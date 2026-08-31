@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "crexi-realestate-scraper-api"
+name = "propyield-ai"
 version = "0.1.0"
-description = "Automated Commercial Real Estate Data Pipeline, ML Valuation Engine, and Search API"
+description = "PropYield AI - Enterprise Commercial Real Estate Data Engine, ML Valuation & Search API"
 authors = [{ name = "FDE Team" }]
 requires-python = ">=3.9"
 

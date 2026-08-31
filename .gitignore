@@ -1,0 +1,23 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Databases & local data
+*.db
+*.sqlite3
+data/
+
+# Sensitive environment configs
+.env
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/

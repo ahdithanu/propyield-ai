@@ -18,8 +18,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="CRE Automated Data Pipeline & Deep ML Search Engine",
-    description="Forward Deployed Engineering Portfolio Project: Graph-Engineered, Harness-Engineered, and Deep ML Powered CRE Pipeline & Search API.",
+    title="PropYield AI - Enterprise Commercial Real Estate Engine",
+    description="AI-Powered Commercial Real Estate Market Intelligence, Property Graph Analytics, Deep ML Deal Valuation, and High-Performance Search API.",
     version="1.0.0",
     lifespan=lifespan
 )
