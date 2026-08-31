@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: cre_search_api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./crexi_realestate.db
+      - SCRAPER_HEADLESS=true
+      - DEBUG=false
+    restart: always
+    volumes:
+      - ./data:/app/data
+
+  pipeline_cron:
+    build: .
+    container_name: cre_looped_pipeline
+    command: ["python", "-m", "app.main", "--run-pipeline"]
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./crexi_realestate.db
+      - SCRAPER_HEADLESS=true
+    restart: "no"
