@@ -1,4 +1,4 @@
-# Forward Deployed Engineering (FDE) Portfolio Project: Commercial Real Estate Automated Data Pipeline, Graph Engine & Deep ML Search API
+# Commercial Real Estate Automated Data Pipeline, Graph Engine & Deep ML Search API
 
 > **An enterprise-grade, fully-automated data extraction pipeline, Property Graph topology engine, Isolation Forest anomaly detector, Deep ML valuation model, and high-performance FastAPI search API designed for the Commercial Real Estate (CRE) market.**
 
