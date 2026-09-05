@@ -80,6 +80,10 @@ function toListing(raw: Record<string, unknown>, i: number): Listing {
     description: s(raw["description"]) || null,
     year_built: raw["year_built"] !== undefined ? n(raw["year_built"]) : null,
     noi: raw["noi"] !== undefined ? n(raw["noi"]) : null,
+    external_url: s(
+      raw["external_url"] ?? raw["url"] ?? raw["source_url"] ?? raw["crexi_url"],
+      `https://www.crexi.com/properties`,
+    ),
   };
 }
 

@@ -30,6 +30,7 @@ export interface Listing {
   description?: string | null;
   year_built?: number | null;
   noi?: number | null;
+  external_url?: string | null;
 }
 
 export interface MarketSummary {

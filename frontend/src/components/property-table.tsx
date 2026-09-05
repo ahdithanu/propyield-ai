@@ -80,9 +80,16 @@ export function PropertyTable({
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onAnalyze(l)}>
-                    <Calculator className="size-3.5" /> Analyze
-                  </Button>
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onAnalyze(l)}>
+                      <Calculator className="size-3.5" /> Analyze
+                    </Button>
+                    <Button asChild size="sm" variant="secondary">
+                      <Link to="/properties/$id" params={{ id: l.id }}>
+                        View Detail
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             );

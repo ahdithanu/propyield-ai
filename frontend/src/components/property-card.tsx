@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calculator, MapPin, Network } from "lucide-react";
+import { Calculator, ExternalLink, MapPin, Network } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,7 @@ export function PropertyCard({
 }) {
   return (
     <article className="glass group flex flex-col overflow-hidden rounded-2xl transition-shadow hover:shadow-[0_0_40px_-16px_var(--emerald)]">
-      <div className="relative aspect-[16/9] overflow-hidden bg-surface-2">
+      <Link to="/properties/$id" params={{ id: listing.id }} className="relative aspect-[16/9] overflow-hidden bg-surface-2 block">
         {listing.image_url ? (
           <img
             src={listing.image_url}
@@ -78,11 +78,13 @@ export function PropertyCard({
         <span className="num absolute right-3 top-3 rounded-full bg-background/80 px-2.5 py-1 text-xs font-semibold text-emerald backdrop-blur">
           {pct(listing.cap_rate)} cap
         </span>
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div>
-          <h3 className="text-sm font-semibold leading-snug">{listing.title}</h3>
+          <Link to="/properties/$id" params={{ id: listing.id }} className="hover:text-emerald transition-colors">
+            <h3 className="text-sm font-semibold leading-snug">{listing.title}</h3>
+          </Link>
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="size-3.5" />
             {[listing.address, listing.city].filter(Boolean).join(", ")} {listing.state} {listing.zip}
@@ -107,9 +109,9 @@ export function PropertyCard({
               <Network className="size-3.5" /> Graph
             </Link>
           </Button>
-          <Button asChild size="sm" variant="secondary">
+          <Button asChild size="sm" variant="secondary" className="gap-1.5">
             <Link to="/properties/$id" params={{ id: listing.id }}>
-              View Detail
+              <ExternalLink className="size-3.5" /> View Detail
             </Link>
           </Button>
         </div>

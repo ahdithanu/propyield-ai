@@ -65,6 +65,7 @@ function build(
     noi: Math.round((price * cap) / 100),
     description:
       "Institutional-quality asset in a high-velocity submarket with durable tenancy and below-replacement-cost basis.",
+    external_url: `https://www.crexi.com/properties?search=${encodeURIComponent(title)}`,
   };
 }
 

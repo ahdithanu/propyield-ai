@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Building2, MapPin } from "lucide-react";
+import { ArrowLeft, Building2, ExternalLink, MapPin } from "lucide-react";
 
 import { DealScoreBar } from "@/components/property-card";
 import { SiteHeader } from "@/components/site-header";
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/properties/$id")({
 function PropertyDetail() {
   const { id } = Route.useParams();
   const { data, isLoading } = useQuery(listingsQuery(FULL_QUERY));
-  const listing = data?.data.find((l) => l.id === id);
+  const listing = data?.data.find((l) => String(l.id) === String(id) || (l.external_id && String(l.external_id) === String(id)));
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,6 +126,11 @@ function PropertyDetail() {
                     <Link to="/market-hubs" search={{ hub: listing.city }}>
                       <Building2 className="size-3.5" /> Graph topology for {listing.city}
                     </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="gap-1.5">
+                    <a href={listing.external_url ?? "https://www.crexi.com/properties"} target="_blank" rel="noreferrer">
+                      <ExternalLink className="size-3.5" /> Direct Listing Source Post
+                    </a>
                   </Button>
                 </div>
               </div>
