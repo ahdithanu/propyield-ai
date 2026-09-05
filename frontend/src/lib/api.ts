@@ -17,7 +17,7 @@ import type {
 } from "./types";
 
 export const API_BASE =
-  (import.meta.env["VITE_API_BASE_URL"] as string | undefined) ?? "http://localhost:8000/api/v1";
+  (import.meta.env["VITE_API_BASE_URL"] as string | undefined) ?? "https://propyield-backend.onrender.com/api/v1";
 
 export interface ApiResult<T> {
   data: T;
@@ -25,7 +25,7 @@ export interface ApiResult<T> {
   offline: boolean;
 }
 
-const TIMEOUT_MS = 6000;
+const TIMEOUT_MS = 8000;
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController();
@@ -57,7 +57,7 @@ function toListing(raw: Record<string, unknown>, i: number): Listing {
   const predicted = n(raw["ml_predicted_price"] ?? raw["predicted_price"] ?? raw["fair_market_value"], price);
   const under = raw["undervaluation_pct"];
   return {
-    id: s(raw["id"] ?? raw["listing_id"] ?? raw["_id"], `listing-${i}`),
+    id: s(raw["id"] ?? raw["external_id"] ?? raw["listing_id"] ?? raw["_id"], `listing-${i}`),
     title: s(raw["title"] ?? raw["name"], "Commercial Property"),
     address: s(raw["address"] ?? raw["street_address"]),
     city: s(raw["city"]),
