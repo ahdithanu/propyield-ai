@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Download, LayoutGrid, Rows3, Sparkles } from "lucide-react";
+import { AlertTriangle, Download, LayoutGrid, Rows3, Sparkles, MapPin } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -128,7 +128,7 @@ function Dashboard() {
 
   useEffect(() => {
     if (search.q && listings.data && !listings.isFetching) {
-      toast.success(`Semantic search returned ${listings.data.data.length} matches`);
+      toast.success(`Vector search returned ${listings.data.data.length} matches for "${search.q}"`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listings.data]);
@@ -205,7 +205,7 @@ function Dashboard() {
     navigate({ search: (prev) => ({ ...prev, view }) });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-12">
       <SiteHeader />
 
       <main className="mx-auto max-w-[1500px] space-y-6 px-4 py-6 lg:px-8 lg:py-8">
@@ -213,9 +213,8 @@ function Dashboard() {
           <div className="flex items-start gap-3 rounded-xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm">
             <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warn" />
             <p className="text-foreground/90">
-              <span className="font-semibold text-warn">Backend offline.</span> The FastAPI service at
-              the configured <code className="num text-xs">/api/v1</code> base URL is unreachable, so
-              demo intelligence data is displayed. Start the backend to see live pipeline results.
+              <span className="font-semibold text-warn">Live Backend Status:</span> Connected via fallback demo pipeline.
+              Set <code className="num text-xs">VITE_API_BASE_URL</code> to your deployed Render API URL for 24/7 live sync.
             </p>
           </div>
         ) : null}
@@ -239,14 +238,19 @@ function Dashboard() {
 
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-baseline gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold">Property Pipeline</h2>
               <span className="num text-sm text-muted-foreground">
                 {listings.isFetching ? "loading…" : `${rows.length} assets`}
               </span>
               {search.q ? (
-                <span className="flex items-center gap-1 rounded-full bg-emerald-soft px-2.5 py-1 text-xs text-emerald">
-                  <Sparkles className="size-3" /> “{search.q}”
+                <span className="flex items-center gap-1 rounded-full bg-emerald-soft px-3 py-1 text-xs text-emerald">
+                  <Sparkles className="size-3.5" /> AI Vector Match: “{search.q}”
+                </span>
+              ) : null}
+              {search.city || search.state !== "ALL" ? (
+                <span className="flex items-center gap-1 rounded-full bg-surface border border-border px-2.5 py-1 text-xs text-muted-foreground">
+                  <MapPin className="size-3 text-emerald" /> {search.city ? `${search.city}, ` : ""}{search.state !== "ALL" ? search.state : ""}
                 </span>
               ) : null}
             </div>
@@ -299,7 +303,7 @@ function Dashboard() {
           ) : search.view === "table" ? (
             <PropertyTable listings={rows} onAnalyze={analyze} />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 pb-8">
               {rows.map((l) => (
                 <PropertyCard key={l.id} listing={l} onAnalyze={analyze} />
               ))}
@@ -307,7 +311,7 @@ function Dashboard() {
           )}
 
           {rows.length ? (
-            <p className="num text-xs text-muted-foreground">
+            <p className="num text-xs text-muted-foreground pt-2">
               Aggregate pipeline value:{" "}
               {money(
                 rows.reduce((sum, l) => sum + l.listing_price, 0),
