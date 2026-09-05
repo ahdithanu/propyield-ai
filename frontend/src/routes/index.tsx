@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Download, LayoutGrid, Rows3, Sparkles, MapPin } from "lucide-react";
+import { AlertTriangle, Compass, Download, LayoutGrid, Rows3, Sparkles, MapPin } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,6 +9,8 @@ import { KpiCards } from "@/components/kpi-cards";
 import { PropertyCard } from "@/components/property-card";
 import { PropertyTable } from "@/components/property-table";
 import { SiteHeader } from "@/components/site-header";
+import { DemoTourModal } from "@/components/demo-tour";
+import { IcMemoModal } from "@/components/ic-memo-modal";
 import { ValuationDrawer } from "@/components/valuation-drawer";
 import { formFromListing, type ValuationForm } from "@/components/valuation-panel";
 import { Button } from "@/components/ui/button";
@@ -103,6 +105,8 @@ function Dashboard() {
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerForm, setDrawerForm] = useState<ValuationForm | undefined>(undefined);
+  const [demoTourOpen, setDemoTourOpen] = useState(false);
+  const [icMemoListing, setIcMemoListing] = useState<Listing | null>(null);
 
   const query: ListingQuery = useMemo(
     () => ({
@@ -174,6 +178,26 @@ function Dashboard() {
     setDrawerOpen(true);
   };
 
+  const handleStepAction = (stepIndex: number) => {
+    if (stepIndex === 0) {
+      // Step 1: AI Vector Search
+      navigate({ search: (prev) => ({ ...prev, q: "high cap rate retail near highway" }) });
+    } else if (stepIndex === 1 && rows.length) {
+      // Step 2: ML Valuation & Arbitrage
+      const topDeal = rows.reduce((best, cur) => (cur.deal_score > best.deal_score ? cur : best), rows[0]!);
+      analyze(topDeal);
+    } else if (stepIndex === 2) {
+      // Step 3: Graph Topology
+      navigate({ to: "/market-hubs" });
+    } else if (stepIndex === 3 && rows.length) {
+      // Step 4: Scenario Underwriting Sandbox
+      analyze(rows[0]!);
+    } else if (stepIndex === 4 && rows.length) {
+      // Step 5: Partner IC Memo
+      setIcMemoListing(rows[0]!);
+    }
+  };
+
   const exportCsv = () => {
     if (!rows.length) {
       toast.error("Nothing to export yet");
@@ -206,7 +230,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background pb-12">
-      <SiteHeader />
+      <SiteHeader onOpenDemo={() => setDemoTourOpen(true)} />
 
       <main className="mx-auto max-w-[1500px] space-y-6 px-4 py-6 lg:px-8 lg:py-8">
         {offline ? (
@@ -219,11 +243,20 @@ function Dashboard() {
           </div>
         ) : null}
 
-        <section className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Commercial Deal Intelligence</h1>
-          <p className="text-sm text-muted-foreground">
-            ML-scored valuation, vector search, and graph centrality across the live CRE pipeline.
-          </p>
+        <section className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">Commercial Deal Intelligence</h1>
+            <p className="text-sm text-muted-foreground">
+              ML-scored valuation, vector search, and graph centrality across the live CRE pipeline.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setDemoTourOpen(true)}
+            className="gap-2 border border-emerald/40 bg-emerald-soft text-emerald hover:bg-emerald-soft/80 font-semibold"
+          >
+            <Compass className="size-4" /> Start Partner Product Walkthrough
+          </Button>
         </section>
 
         <KpiCards data={summary.data?.data} loading={summary.isLoading} />
@@ -301,11 +334,16 @@ function Dashboard() {
               </Button>
             </div>
           ) : search.view === "table" ? (
-            <PropertyTable listings={rows} onAnalyze={analyze} />
+            <PropertyTable listings={rows} onAnalyze={analyze} onGenerateIcMemo={(l) => setIcMemoListing(l)} />
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 pb-8">
               {rows.map((l) => (
-                <PropertyCard key={l.id} listing={l} onAnalyze={analyze} />
+                <PropertyCard
+                  key={l.id}
+                  listing={l}
+                  onAnalyze={analyze}
+                  onGenerateIcMemo={(item) => setIcMemoListing(item)}
+                />
               ))}
             </div>
           )}
@@ -323,6 +361,8 @@ function Dashboard() {
       </main>
 
       <ValuationDrawer open={drawerOpen} onOpenChange={setDrawerOpen} initial={drawerForm} />
+      <DemoTourModal open={demoTourOpen} onOpenChange={setDemoTourOpen} onSelectStepAction={handleStepAction} />
+      <IcMemoModal listing={icMemoListing} open={Boolean(icMemoListing)} onOpenChange={(o) => !o && setIcMemoListing(null)} />
     </div>
   );
 }

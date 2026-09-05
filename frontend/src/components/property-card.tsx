@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calculator, ExternalLink, MapPin, Network } from "lucide-react";
+import { Calculator, ExternalLink, FileText, MapPin, Network } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,9 +54,11 @@ function Stat({ label, value }: { label: string; value: string }) {
 export function PropertyCard({
   listing,
   onAnalyze,
+  onGenerateIcMemo,
 }: {
   listing: Listing;
   onAnalyze: (listing: Listing) => void;
+  onGenerateIcMemo?: (listing: Listing) => void;
 }) {
   return (
     <article className="glass group flex flex-col overflow-hidden rounded-2xl transition-shadow hover:shadow-[0_0_40px_-16px_var(--emerald)]">
@@ -104,6 +106,16 @@ export function PropertyCard({
           <Button size="sm" className="col-span-2 gap-1.5 font-semibold" onClick={() => onAnalyze(listing)}>
             <Calculator className="size-3.5" /> Analyze Valuation
           </Button>
+          {onGenerateIcMemo ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="col-span-2 gap-1.5 font-semibold text-emerald border-emerald/30 bg-emerald-soft/30 hover:bg-emerald-soft"
+              onClick={() => onGenerateIcMemo(listing)}
+            >
+              <FileText className="size-3.5" /> Export IC Memo
+            </Button>
+          ) : null}
           <Button asChild size="sm" variant="outline" className="gap-1.5">
             <Link to="/market-hubs" search={{ hub: listing.city }}>
               <Network className="size-3.5" /> Graph

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calculator } from "lucide-react";
+import { Calculator, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,11 @@ import { cn } from "@/lib/utils";
 export function PropertyTable({
   listings,
   onAnalyze,
+  onGenerateIcMemo,
 }: {
   listings: Listing[];
   onAnalyze: (listing: Listing) => void;
+  onGenerateIcMemo?: (listing: Listing) => void;
 }) {
   return (
     <div className="glass overflow-x-auto rounded-2xl">
@@ -84,6 +86,16 @@ export function PropertyTable({
                     <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onAnalyze(l)}>
                       <Calculator className="size-3.5" /> Analyze
                     </Button>
+                    {onGenerateIcMemo ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-emerald border-emerald/30 bg-emerald-soft/30 hover:bg-emerald-soft"
+                        onClick={() => onGenerateIcMemo(l)}
+                      >
+                        <FileText className="size-3.5" /> IC Memo
+                      </Button>
+                    ) : null}
                     <Button asChild size="sm" variant="secondary">
                       <Link to="/properties/$id" params={{ id: l.id }}>
                         View Detail

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Activity, Calculator, LayoutDashboard, Menu, Network, Search, TrendingUp } from "lucide-react";
+import { Activity, Calculator, Compass, LayoutDashboard, Menu, Network, Search, Sparkles, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +46,7 @@ export function LiveBadge() {
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { q?: string; type?: string };
   const [term, setTerm] = useState(search.q ?? "");
@@ -90,6 +90,17 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+
+          {onOpenDemo ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onOpenDemo}
+              className="gap-1.5 border-emerald/40 text-emerald hover:bg-emerald-soft font-semibold"
+            >
+              <Compass className="size-4 text-emerald" /> Interactive Demo
+            </Button>
+          ) : null}
 
           <div className="ml-auto hidden xl:block">
             <LiveBadge />

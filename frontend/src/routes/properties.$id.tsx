@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Building2, ExternalLink, MapPin } from "lucide-react";
+import { ArrowLeft, Building2, ExternalLink, FileText, MapPin } from "lucide-react";
+import { useState } from "react";
 
 import { DealScoreBar } from "@/components/property-card";
 import { SiteHeader } from "@/components/site-header";
+import { IcMemoModal } from "@/components/ic-memo-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,6 +49,7 @@ function PropertyDetail() {
   const { id } = Route.useParams();
   const { data, isLoading } = useQuery(listingsQuery(FULL_QUERY));
   const listing = data?.data.find((l) => String(l.id) === String(id) || (l.external_id && String(l.external_id) === String(id)));
+  const [icMemoOpen, setIcMemoOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,6 +125,13 @@ function PropertyDetail() {
                 ) : null}
 
                 <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    className="gap-1.5 font-semibold text-emerald border-emerald/30 bg-emerald-soft/30 hover:bg-emerald-soft"
+                    onClick={() => setIcMemoOpen(true)}
+                  >
+                    <FileText className="size-3.5" /> Export IC Deal Memo
+                  </Button>
                   <Button asChild variant="outline" size="sm">
                     <Link to="/market-hubs" search={{ hub: listing.city }}>
                       <Building2 className="size-3.5" /> Graph topology for {listing.city}
@@ -140,6 +150,8 @@ function PropertyDetail() {
               <h2 className="mb-4 text-sm font-semibold">ML Valuation for this asset</h2>
               <ValuationPanel initial={formFromListing(listing)} />
             </div>
+
+            <IcMemoModal listing={listing} open={icMemoOpen} onOpenChange={setIcMemoOpen} />
           </>
         )}
       </main>
