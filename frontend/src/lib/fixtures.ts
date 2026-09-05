@@ -13,6 +13,22 @@ export const TYPE_IMAGE: Record<string, string> = {
   Land: industrial,
 };
 
+const INDIVIDUAL_IMAGES: Record<string, string> = {
+  "p-1": "https://images.unsplash.com/photo-1555636222-cae831e670b3?q=80&w=1200&auto=format&fit=crop",
+  "p-2": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1200&auto=format&fit=crop",
+  "p-3": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
+  "p-4": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop",
+  "p-5": "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=1200&auto=format&fit=crop",
+  "p-6": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop",
+  "p-7": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop",
+  "p-8": "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=1200&auto=format&fit=crop",
+  "p-9": "https://images.unsplash.com/photo-1567449303078-57ad995bd301?q=80&w=1200&auto=format&fit=crop",
+  "p-10": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1200&auto=format&fit=crop",
+  "p-11": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=1200&auto=format&fit=crop",
+  "p-12": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop",
+  "p-13": "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1200&auto=format&fit=crop",
+};
+
 function build(
   id: string,
   title: string,
@@ -25,6 +41,7 @@ function build(
   sqft: number,
   score: number,
   address: string,
+  customImage?: string
 ): Listing {
   const undervaluation = (score - 50) * 0.4;
   const predicted = Math.round(price * (1 + undervaluation / 100));
@@ -43,7 +60,7 @@ function build(
     deal_score: score,
     ml_predicted_price: predicted,
     undervaluation_pct: Number(undervaluation.toFixed(1)),
-    image_url: TYPE_IMAGE[type] ?? retail,
+    image_url: customImage ?? INDIVIDUAL_IMAGES[id] ?? TYPE_IMAGE[type] ?? retail,
     year_built: 1998 + (Number(id.replace(/\D/g, "")) % 25),
     noi: Math.round((price * cap) / 100),
     description:
@@ -64,6 +81,7 @@ export const FIXTURE_LISTINGS: Listing[] = [
   build("p-10", "Transit-Adjacent Mid-Rise Rental", "Brooklyn", "NY", "11217", "Multi-Family", 22400000, 4.6, 91200, 48, "470 Atlantic Ave"),
   build("p-11", "Cold Storage Flex Facility", "Fresno", "CA", "93725", "Industrial", 5450000, 7.15, 61800, 81, "3410 S Chestnut Ave"),
   build("p-12", "Suburban Dental Retail Pad", "Savannah", "GA", "31405", "Retail", 1480000, 6.95, 5200, 72, "7805 Abercorn St"),
+  build("p-13", "Ocala Premier Apartment Community - 64 Units", "Ocala", "FL", "34471", "Multi-Family", 8900000, 6.4, 52000, 85, "1200 SW 27th Ave"),
 ];
 
 export const FIXTURE_SUMMARY: MarketSummary = {
