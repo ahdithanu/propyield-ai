@@ -25,7 +25,7 @@ export interface ApiResult<T> {
   offline: boolean;
 }
 
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 20000;
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController();

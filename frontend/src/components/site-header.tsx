@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Activity, Calculator, Compass, LayoutDashboard, Menu, Network, Search, Sparkles, TrendingUp } from "lucide-react";
+import { Activity, Calculator, Compass, LayoutDashboard, Menu, Network, Search, Sparkles, TrendingUp, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -55,8 +55,15 @@ export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
 
   useEffect(() => setTerm(search.q ?? ""), [search.q]);
 
-  const submit = () =>
-    navigate({ to: "/", search: (prev) => ({ ...(prev as object), q: term, page: 1 }) as never });
+  const submit = (overrideTerm?: string) => {
+    const qVal = overrideTerm !== undefined ? overrideTerm : term;
+    navigate({ to: "/", search: (prev) => ({ ...(prev as object), q: qVal, page: 1 }) as never });
+  };
+
+  const clear = () => {
+    setTerm("");
+    submit("");
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
@@ -72,8 +79,18 @@ export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
               onKeyDown={(e) => e.key === "Enter" && submit()}
               aria-label="AI property search"
               placeholder="Search properties using AI (e.g. 'high cap rate triple net retail in Texas')..."
-              className="h-10 bg-surface/70 pl-9 text-sm placeholder:text-muted-foreground/70"
+              className="h-10 bg-surface/70 pl-9 pr-20 text-sm placeholder:text-muted-foreground/70"
             />
+            <div className="absolute right-1.5 flex items-center gap-1">
+              {term ? (
+                <button onClick={clear} className="p-1 text-muted-foreground hover:text-foreground" title="Clear search">
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
+              <Button size="sm" variant="ghost" onClick={() => submit()} className="h-7 px-2 text-xs font-semibold text-emerald hover:bg-emerald-soft">
+                Search
+              </Button>
+            </div>
           </div>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -145,8 +162,18 @@ export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
               onKeyDown={(e) => e.key === "Enter" && submit()}
               aria-label="AI property search"
               placeholder="Search properties using AI..."
-              className="h-10 bg-surface/70 pl-9 text-sm"
+              className="h-10 bg-surface/70 pl-9 pr-16 text-sm"
             />
+            <div className="absolute right-1.5 flex items-center gap-1">
+              {term ? (
+                <button onClick={clear} className="p-1 text-muted-foreground hover:text-foreground">
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
+              <Button size="sm" variant="ghost" onClick={() => submit()} className="h-7 px-2 text-xs text-emerald">
+                Go
+              </Button>
+            </div>
           </div>
         </div>
 

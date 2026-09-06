@@ -240,9 +240,9 @@ export function filterFixtures(params: Record<string, string>): Listing[] {
     if (l.cap_rate < nums("min_cap_rate", 0) || l.cap_rate > nums("max_cap_rate", Infinity)) return false;
     if (l.sqft < nums("min_sqft", 0) || l.sqft > nums("max_sqft", Infinity)) return false;
     if (q) {
-      const hay = `${l.title} ${l.city} ${l.state} ${l.property_type} ${l.description ?? ""}`.toLowerCase();
-      const words = q.split(/\s+/).filter((w) => w.length > 3);
-      if (words.length && !words.some((w) => hay.includes(w))) return false;
+      const hay = `${l.title} ${l.address} ${l.city} ${l.state} ${l.zip} ${l.property_type} ${l.description ?? ""}`.toLowerCase();
+      const words = q.split(/\s+/).filter(Boolean);
+      if (words.length && !words.every((w) => hay.includes(w))) return false;
     }
     return true;
   }).sort((a, b) => b.deal_score - a.deal_score);
