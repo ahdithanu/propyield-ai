@@ -223,4 +223,9 @@ export const marketHubsQuery = () =>
   queryOptions({ queryKey: ["market-hubs"], queryFn: fetchMarketHubs, staleTime: 60_000 });
 
 export const listingsQuery = (q: ListingQuery) =>
-  queryOptions({ queryKey: ["listings", q], queryFn: () => fetchListings(q) });
+  queryOptions({
+    queryKey: ["listings", q],
+    queryFn: () => fetchListings(q),
+    retry: 1,
+    staleTime: 30_000,
+  });

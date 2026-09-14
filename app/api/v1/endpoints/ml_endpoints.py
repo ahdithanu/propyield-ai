@@ -13,6 +13,7 @@ from app.pipeline.looped_runner import looped_engine
 router = APIRouter()
 
 @router.post("/predict-price", response_model=MLValuationResponse)
+@router.post("/predict", response_model=MLValuationResponse)
 async def predict_property_valuation(request: MLValuationRequest):
     """
     Deep ML Valuation Endpoint: predicts fair market price, price/sqft, expected cap rate, and undervaluation deal score.
@@ -22,7 +23,8 @@ async def predict_property_valuation(request: MLValuationRequest):
         sqft=request.sqft,
         city=request.city,
         state=request.state,
-        cap_rate=request.cap_rate
+        cap_rate=request.cap_rate,
+        list_price=request.listed_price or 0.0
     )
 
 @router.post("/semantic-search")

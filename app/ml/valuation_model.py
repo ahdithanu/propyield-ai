@@ -38,7 +38,8 @@ class PropertyValuationMLModel:
         if self.is_trained:
             try:
                 X_num = np.array([[sqft, cap_rate]])
-                X_cat = self.encoder.transform([[property_type, state]])
+                cat_df = pd.DataFrame([{"property_type": property_type, "state": state}])
+                X_cat = self.encoder.transform(cat_df)
                 X = np.hstack([X_num, X_cat])
                 predicted_price = float(self.model.predict(X)[0])
             except Exception:
@@ -69,7 +70,11 @@ class PropertyValuationMLModel:
             price_per_sqft=price_per_sqft,
             confidence_score=0.92,
             undervaluation_score=undervaluation_score,
-            recommendation=recommendation
+            recommendation=recommendation,
+            predicted_price=round(predicted_price, 2),
+            predicted_price_per_sqft=price_per_sqft,
+            deal_score=undervaluation_score,
+            undervaluation_pct=round(max(0.0, ((predicted_price - list_price) / max(1.0, predicted_price)) * 100), 1) if list_price > 0 else 0.0
         )
 
     def _heuristic_valuation(self, property_type: str, sqft: float, cap_rate: float) -> float:

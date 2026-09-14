@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/health", tags=["System Health"])
+@app.get("/api/v1/health", tags=["System Health"])
 async def health_check():
     return {"status": "HEALTHY", "service": "CRE Data Pipeline & ML Engine", "version": "1.0.0"}
 
@@ -45,4 +46,6 @@ if __name__ == "__main__":
         res = asyncio.run(looped_engine.run_pipeline_iteration())
         print(f"Execution complete! Summary: {res}")
     else:
-        uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+        import os
+        port = int(os.environ.get("PORT", 8000))
+        uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

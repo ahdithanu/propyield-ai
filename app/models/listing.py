@@ -64,6 +64,7 @@ class MLValuationRequest(BaseModel):
     city: str = "Austin"
     state: str = "TX"
     cap_rate: float = 6.5
+    listed_price: Optional[float] = 0.0
 
 class MLValuationResponse(BaseModel):
     estimated_price: float
@@ -72,7 +73,12 @@ class MLValuationResponse(BaseModel):
     confidence_score: float
     undervaluation_score: float
     recommendation: str
+    predicted_price: Optional[float] = None
+    predicted_price_per_sqft: Optional[float] = None
+    deal_score: Optional[float] = None
+    undervaluation_pct: Optional[float] = None
 
 class SemanticSearchRequest(BaseModel):
     query: str = "high cap rate retail near highway"
-    limit: int = 5
+    limit: Optional[int] = 24
+    filters: Optional[Dict[str, Any]] = None

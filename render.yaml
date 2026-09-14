@@ -1,0 +1,33 @@
+# Render Blueprint for PropYield AI
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ── Backend Web Service (FastAPI + Deep ML) ──────────────────────────────
+  - type: web
+    name: propyield-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8000"
+
+  # ── Frontend Static Site (Vite + TanStack) ──────────────────────────────
+  - type: web
+    name: propyield-frontend
+    runtime: static
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist/client
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://propyield-backend.onrender.com/api/v1
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
