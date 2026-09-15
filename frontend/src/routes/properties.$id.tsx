@@ -6,6 +6,7 @@ import { useState } from "react";
 import { DealScoreBar } from "@/components/property-card";
 import { SiteHeader } from "@/components/site-header";
 import { IcMemoModal } from "@/components/ic-memo-modal";
+import { AuthenticPropertyMedia } from "@/components/authentic-property-media";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -73,15 +74,12 @@ function PropertyDetail() {
         ) : (
           <>
             <div className="glass overflow-hidden rounded-2xl">
-              {listing.image_url ? (
-                <img
-                  src={listing.image_url}
-                  alt={`${listing.property_type} asset at ${listing.address}`}
-                  width={1024}
-                  height={640}
-                  className="h-64 w-full object-cover lg:h-80"
-                />
-              ) : null}
+              <AuthenticPropertyMedia
+                listing={listing}
+                aspectRatio="hero"
+                interactive={true}
+                className="rounded-t-2xl rounded-b-none border-b border-white/10"
+              />
               <div className="space-y-5 p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>

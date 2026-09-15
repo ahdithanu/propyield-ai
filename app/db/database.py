@@ -42,4 +42,12 @@ async def init_db():
             await conn.execute(text("ALTER TABLE listings ADD COLUMN organization_id VARCHAR(64) DEFAULT 'org_default'"))
         except Exception:
             pass
+        try:
+            await conn.execute(text("ALTER TABLE listings ADD COLUMN tenant_domain VARCHAR(128)"))
+        except Exception:
+            pass
+        try:
+            await conn.execute(text("ALTER TABLE listings ADD COLUMN tenant_name VARCHAR(128)"))
+        except Exception:
+            pass
 

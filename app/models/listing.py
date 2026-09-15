@@ -15,6 +15,8 @@ class ListingBase(BaseModel):
     zip_code: str = Field(..., description="Postal code")
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    tenant_domain: Optional[str] = Field(None, description="Verified corporate domain of anchor tenant or listing brokerage")
+    tenant_name: Optional[str] = Field(None, description="Name of corporate anchor tenant or listing firm")
     description: Optional[str] = None
 
 class ListingCreate(ListingBase):

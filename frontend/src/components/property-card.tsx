@@ -3,6 +3,7 @@ import { Calculator, ExternalLink, FileText, MapPin, Network } from "lucide-reac
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AuthenticPropertyMedia } from "@/components/authentic-property-media";
 import { dealVerdict, money, money2, num, pct } from "@/lib/format";
 import type { Listing } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -62,25 +63,19 @@ export function PropertyCard({
 }) {
   return (
     <article className="glass group flex flex-col overflow-hidden rounded-2xl transition-shadow hover:shadow-[0_0_40px_-16px_var(--emerald)]">
-      <Link to="/properties/$id" params={{ id: listing.id }} className="relative aspect-[16/9] overflow-hidden bg-surface-2 block">
-        {listing.image_url ? (
-          <img
-            src={listing.image_url}
-            alt={`${listing.property_type} property at ${listing.address}, ${listing.city}`}
-            loading="lazy"
-            width={1024}
-            height={640}
-            className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-        ) : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent" />
-        <Badge className="absolute left-3 top-3 border-emerald/30 bg-background/80 text-emerald backdrop-blur">
-          {listing.property_type}
-        </Badge>
-        <span className="num absolute right-3 top-3 rounded-full bg-background/80 px-2.5 py-1 text-xs font-semibold text-emerald backdrop-blur">
-          {pct(listing.cap_rate)} cap
-        </span>
-      </Link>
+      <div className="relative">
+        <AuthenticPropertyMedia listing={listing} aspectRatio="video" interactive={true} />
+        <div className="pointer-events-none absolute left-3 top-10 z-10">
+          <Badge className="border-emerald/30 bg-background/85 text-emerald backdrop-blur text-[10px]">
+            {listing.property_type}
+          </Badge>
+        </div>
+        <div className="pointer-events-none absolute right-3 top-10 z-10">
+          <span className="num rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-semibold text-emerald backdrop-blur">
+            {pct(listing.cap_rate)} cap
+          </span>
+        </div>
+      </div>
 
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div>

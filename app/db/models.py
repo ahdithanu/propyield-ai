@@ -73,6 +73,8 @@ class ListingModel(Base):
     zip_code = Column(String, index=True, nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
+    tenant_domain = Column(String, nullable=True)
+    tenant_name = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     scraped_at = Column(DateTime, default=datetime.datetime.utcnow)
     raw_data = Column(JSON, nullable=True)

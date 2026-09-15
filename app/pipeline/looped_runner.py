@@ -123,6 +123,10 @@ class LoopedPipelineEngine:
                     existing.undervaluation_score = item.get("undervaluation_score")
                     existing.cap_rate = item.get("cap_rate")
                     existing.sqft = item.get("sqft")
+                    existing.latitude = item.get("latitude")
+                    existing.longitude = item.get("longitude")
+                    existing.tenant_domain = item.get("tenant_domain")
+                    existing.tenant_name = item.get("tenant_name")
                     existing.raw_data = item.get("raw_data")
                 else:
                     db_item = ListingModel(
@@ -140,6 +144,8 @@ class LoopedPipelineEngine:
                         zip_code=item["zip_code"],
                         latitude=item.get("latitude"),
                         longitude=item.get("longitude"),
+                        tenant_domain=item.get("tenant_domain"),
+                        tenant_name=item.get("tenant_name"),
                         description=item.get("description"),
                         raw_data=item.get("raw_data")
                     )

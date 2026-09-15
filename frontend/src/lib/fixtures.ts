@@ -13,22 +13,6 @@ export const TYPE_IMAGE: Record<string, string> = {
   Land: industrial,
 };
 
-const INDIVIDUAL_IMAGES: Record<string, string> = {
-  "p-1": "https://images.unsplash.com/photo-1555636222-cae831e670b3?q=80&w=1200&auto=format&fit=crop",
-  "p-2": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1200&auto=format&fit=crop",
-  "p-3": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
-  "p-4": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop",
-  "p-5": "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=1200&auto=format&fit=crop",
-  "p-6": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop",
-  "p-7": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop",
-  "p-8": "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=1200&auto=format&fit=crop",
-  "p-9": "https://images.unsplash.com/photo-1567449303078-57ad995bd301?q=80&w=1200&auto=format&fit=crop",
-  "p-10": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1200&auto=format&fit=crop",
-  "p-11": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=1200&auto=format&fit=crop",
-  "p-12": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop",
-  "p-13": "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1200&auto=format&fit=crop",
-};
-
 function build(
   id: string,
   title: string,
@@ -41,6 +25,10 @@ function build(
   sqft: number,
   score: number,
   address: string,
+  latitude: number,
+  longitude: number,
+  tenant_name?: string,
+  tenant_domain?: string,
   customImage?: string
 ): Listing {
   const undervaluation = (score - 50) * 0.4;
@@ -60,7 +48,11 @@ function build(
     deal_score: score,
     ml_predicted_price: predicted,
     undervaluation_pct: Number(undervaluation.toFixed(1)),
-    image_url: customImage ?? INDIVIDUAL_IMAGES[id] ?? TYPE_IMAGE[type] ?? retail,
+    image_url: customImage ?? null,
+    latitude,
+    longitude,
+    tenant_name: tenant_name ?? null,
+    tenant_domain: tenant_domain ?? null,
     year_built: 1998 + (Number(id.replace(/\D/g, "")) % 25),
     noi: Math.round((price * cap) / 100),
     description:
@@ -70,19 +62,19 @@ function build(
 }
 
 export const FIXTURE_LISTINGS: Listing[] = [
-  build("p-1", "Prime NNN Retail Center - Highway 183", "Austin", "TX", "78753", "Retail", 2750000, 6.85, 14200, 84, "8214 Research Blvd"),
-  build("p-2", "Class A Distribution Warehouse - Grand Pkwy", "Houston", "TX", "77433", "Industrial", 8450000, 7.4, 96500, 91, "21400 Clay Rd"),
-  build("p-3", "Brickell Medical Office Condo", "Miami", "FL", "33131", "Office", 4120000, 5.9, 18300, 62, "1450 Brickell Ave"),
-  build("p-4", "Sunbelt Garden Apartments - 84 Units", "Atlanta", "GA", "30318", "Multi-Family", 12600000, 6.1, 78400, 76, "1201 Marietta St NW"),
-  build("p-5", "Single-Tenant Auto Service - I-35 Frontage", "San Antonio", "TX", "78216", "Retail", 1950000, 7.85, 8600, 88, "9950 San Pedro Ave"),
-  build("p-6", "Infill Development Land - 4.2 Acres", "Tampa", "FL", "33607", "Land", 3200000, 4.2, 182000, 54, "4300 W Cypress St"),
-  build("p-7", "Creative Loft Office Campus", "Los Angeles", "CA", "90013", "Office", 15750000, 5.2, 62800, 41, "820 E 3rd St"),
-  build("p-8", "Last-Mile Logistics Hub", "Jacksonville", "FL", "32218", "Industrial", 6300000, 7.95, 74200, 93, "1155 Busch Dr"),
-  build("p-9", "Grocery-Anchored Strip Center", "Dallas", "TX", "75248", "Retail", 9850000, 6.65, 54100, 79, "17390 Preston Rd"),
-  build("p-10", "Transit-Adjacent Mid-Rise Rental", "Brooklyn", "NY", "11217", "Multi-Family", 22400000, 4.6, 91200, 48, "470 Atlantic Ave"),
-  build("p-11", "Cold Storage Flex Facility", "Fresno", "CA", "93725", "Industrial", 5450000, 7.15, 61800, 81, "3410 S Chestnut Ave"),
-  build("p-12", "Suburban Dental Retail Pad", "Savannah", "GA", "31405", "Retail", 1480000, 6.95, 5200, 72, "7805 Abercorn St"),
-  build("p-13", "Ocala Premier Apartment Community - 64 Units", "Ocala", "FL", "34471", "Multi-Family", 8900000, 6.4, 52000, 85, "1200 SW 27th Ave"),
+  build("p-1", "Prime NNN Retail Center - Highway 183", "Austin", "TX", "78753", "Retail", 2750000, 6.85, 14200, 84, "8214 Research Blvd", 30.3667, -97.6942, "Walgreens / AutoZone NNN Pad", "walgreens.com"),
+  build("p-2", "Class A Distribution Warehouse - Grand Pkwy", "Houston", "TX", "77433", "Industrial", 8450000, 7.4, 96500, 91, "21400 Clay Rd", 29.8315, -95.7725, "FedEx Supply Chain Logistics", "fedex.com"),
+  build("p-3", "Brickell Medical Office Condo", "Miami", "FL", "33131", "Office", 4120000, 5.9, 18300, 62, "1450 Brickell Ave", 25.7617, -80.1918, "Baptist Health South Florida", "baptisthealth.net"),
+  build("p-4", "Sunbelt Garden Apartments - 84 Units", "Atlanta", "GA", "30318", "Multi-Family", 12600000, 6.1, 78400, 76, "1201 Marietta St NW", 33.7812, -84.4124, "Greystar Residential Services", "greystar.com"),
+  build("p-5", "Single-Tenant Auto Service - I-35 Frontage", "San Antonio", "TX", "78216", "Retail", 1950000, 7.85, 8600, 88, "9950 San Pedro Ave", 29.5312, -98.4981, "Firestone Complete Auto Care", "firestonecompleteautocare.com"),
+  build("p-6", "Infill Development Land - 4.2 Acres", "Tampa", "FL", "33607", "Land", 3200000, 4.2, 182000, 54, "4300 W Cypress St", 27.9525, -82.5182, "Cushman & Wakefield Commercial", "cushmanwakefield.com"),
+  build("p-7", "Creative Loft Office Campus", "Los Angeles", "CA", "90013", "Office", 15750000, 5.2, 62800, 41, "820 E 3rd St", 34.0458, -118.2341, "JLL Capital Markets Group", "jll.com"),
+  build("p-8", "Last-Mile Logistics Hub", "Jacksonville", "FL", "32218", "Industrial", 6300000, 7.95, 74200, 93, "1155 Busch Dr", 30.4328, -81.6582, "Amazon Freight Distribution Hub", "amazon.com"),
+  build("p-9", "Grocery-Anchored Strip Center", "Dallas", "TX", "75248", "Retail", 9850000, 6.65, 54100, 79, "17390 Preston Rd", 32.9868, -96.8041, "Whole Foods Market Anchor", "wholefoodsmarket.com"),
+  build("p-10", "Transit-Adjacent Mid-Rise Rental", "Brooklyn", "NY", "11217", "Multi-Family", 22400000, 4.6, 91200, 48, "470 Atlantic Ave", 40.6865, -73.9842, "Marcus & Millichap Institutional", "marcusmillichap.com"),
+  build("p-11", "Cold Storage Flex Facility", "Fresno", "CA", "93725", "Industrial", 5450000, 7.15, 61800, 81, "3410 S Chestnut Ave", 36.7025, -119.7428, "Lineage Logistics Cold Storage", "lineagelogistics.com"),
+  build("p-12", "Suburban Dental Retail Pad", "Savannah", "GA", "31405", "Retail", 1480000, 6.95, 5200, 72, "7805 Abercorn St", 31.9965, -81.1278, "Aspen Dental Healthcare", "aspendental.com"),
+  build("p-13", "Ocala Premier Apartment Community - 64 Units", "Ocala", "FL", "34471", "Multi-Family", 8900000, 6.4, 52000, 85, "1200 SW 27th Ave", 29.1872, -82.1401, "Lincoln Property Company", "lpc.com"),
 ];
 
 export const FIXTURE_SUMMARY: MarketSummary = {

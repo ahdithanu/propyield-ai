@@ -27,6 +27,10 @@ export interface Listing {
   ml_predicted_price: number;
   undervaluation_pct: number;
   image_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  tenant_domain?: string | null;
+  tenant_name?: string | null;
   description?: string | null;
   year_built?: number | null;
   noi?: number | null;

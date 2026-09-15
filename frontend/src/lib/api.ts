@@ -3,7 +3,6 @@ import { queryOptions } from "@tanstack/react-query";
 import {
   FIXTURE_HUBS,
   FIXTURE_SUMMARY,
-  TYPE_IMAGE,
   filterFixtures,
   fixturePrediction,
 } from "./fixtures";
@@ -100,7 +99,11 @@ function toListing(raw: Record<string, unknown>, i: number): Listing {
         : predicted > 0
           ? Number((((predicted - price) / predicted) * 100).toFixed(1))
           : 0,
-    image_url: s(raw["image_url"] ?? raw["thumbnail_url"], TYPE_IMAGE[type] ?? TYPE_IMAGE["Retail"]!),
+    image_url: raw["image_url"] ? s(raw["image_url"]) : null,
+    latitude: raw["latitude"] !== undefined && raw["latitude"] !== null ? n(raw["latitude"]) : null,
+    longitude: raw["longitude"] !== undefined && raw["longitude"] !== null ? n(raw["longitude"]) : null,
+    tenant_domain: s(raw["tenant_domain"] ?? raw["domain"]) || null,
+    tenant_name: s(raw["tenant_name"]) || null,
     description: s(raw["description"]) || null,
     year_built: raw["year_built"] !== undefined ? n(raw["year_built"]) : null,
     noi: raw["noi"] !== undefined ? n(raw["noi"]) : null,

@@ -23,7 +23,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "78753",
         "latitude": 30.3667,
         "longitude": -97.6942,
-        "image_url": "https://images.unsplash.com/photo-1555636222-cae831e670b3?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "Walgreens / AutoZone NNN Pad",
+        "tenant_domain": "walgreens.com",
+        "image_url": None,
         "description": "100% leased triple-net corporate retail center anchored by national brand tenant with 12 years remaining on term."
     },
     {
@@ -39,7 +41,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "78702",
         "latitude": 30.2589,
         "longitude": -97.7012,
-        "image_url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "FedEx Ground & Supply Chain",
+        "tenant_domain": "fedex.com",
+        "image_url": None,
         "description": "Class A industrial park flex space featuring dock-high doors and 24ft clear height ceilings."
     },
     {
@@ -55,7 +59,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "33131",
         "latitude": 25.7617,
         "longitude": -80.1918,
-        "image_url": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "Baptist Health South Florida",
+        "tenant_domain": "baptisthealth.net",
+        "image_url": None,
         "description": "Prime Brickell financial district medical office building with 94% occupancy and structured parking garage."
     },
     {
@@ -71,7 +77,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "30308",
         "latitude": 33.7781,
         "longitude": -84.3879,
-        "image_url": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "Greystar Property Management",
+        "tenant_domain": "greystar.com",
+        "image_url": None,
         "description": "48-unit value-add multi-family apartment community in Midtown Atlanta tech corridor."
     },
     {
@@ -87,7 +95,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "75201",
         "latitude": 32.7801,
         "longitude": -96.7970,
-        "image_url": "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "Dollar General Corporate (NYSE: DG)",
+        "tenant_domain": "dollargeneral.com",
+        "image_url": None,
         "description": "New construction 15-year absolute NNN Dollar General store with zero landlord responsibilities."
     },
     {
@@ -103,7 +113,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "34471",
         "latitude": 29.1872,
         "longitude": -82.1401,
-        "image_url": "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "Lincoln Property Company",
+        "tenant_domain": "lpc.com",
+        "image_url": None,
         "description": "High yield 64-unit multi-family apartment complex in growing Ocala Florida logistics corridor."
     },
     {
@@ -119,7 +131,9 @@ MOCK_CREXI_PROPERTIES = [
         "zip_code": "78737",
         "latitude": 30.2201,
         "longitude": -97.9401,
-        "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop",
+        "tenant_name": "CBRE Capital Markets Land Group",
+        "tenant_domain": "cbre.com",
+        "image_url": None,
         "description": "2.0-acre commercial zoned land parcel ideal for drive-thru QSR, car wash, or retail strip development."
     }
 ]
