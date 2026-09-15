@@ -27,14 +27,38 @@ export interface ApiResult<T> {
 
 const TIMEOUT_MS = 20000;
 
+export function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("propyield_access_token");
+}
+
+export function setAuthToken(token: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("propyield_access_token", token);
+  }
+}
+
+export function clearAuthToken(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("propyield_access_token");
+  }
+}
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    ...(token ? { authorization: `Bearer ${token}` } : {}),
+    ...((init?.headers as Record<string, string>) ?? {}),
+  };
+
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       ...init,
       signal: controller.signal,
-      headers: { "content-type": "application/json", ...(init?.headers ?? {}) },
+      headers,
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return (await res.json()) as T;

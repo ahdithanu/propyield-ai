@@ -1,8 +1,20 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import listings, graph_endpoints, harness_endpoints, ml_endpoints, analytics
+from app.api.v1.endpoints import (
+    listings,
+    graph_endpoints,
+    harness_endpoints,
+    ml_endpoints,
+    analytics,
+    auth,
+    audit,
+    billing
+)
 
 api_router = APIRouter()
 
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & Access"])
+api_router.include_router(audit.router, prefix="/audit", tags=["Compliance & Audit"])
+api_router.include_router(billing.router, prefix="/billing", tags=["Monetization & Subscriptions"])
 api_router.include_router(listings.router, prefix="/listings", tags=["Listings & Search"])
 api_router.include_router(graph_endpoints.router, prefix="/graph", tags=["Graph Engineering"])
 api_router.include_router(harness_endpoints.router, prefix="/harness", tags=["Harness Engineering"])

@@ -32,6 +32,14 @@ async def get_db():
         finally:
             await session.close()
 
+from sqlalchemy import text
+
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Migrate columns if SQLite table existed prior to enterprise schema upgrade
+        try:
+            await conn.execute(text("ALTER TABLE listings ADD COLUMN organization_id VARCHAR(64) DEFAULT 'org_default'"))
+        except Exception:
+            pass
+

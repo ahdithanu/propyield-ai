@@ -1,12 +1,65 @@
 import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, Text
+import uuid
+from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, Text, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from app.db.database import Base
+
+class OrganizationModel(Base):
+    __tablename__ = "organizations"
+
+    id = Column(String, primary_key=True, default=lambda: f"org_{uuid.uuid4().hex[:12]}")
+    name = Column(String, nullable=False, index=True)
+    slug = Column(String, unique=True, index=True, nullable=False)
+    subscription_tier = Column(String, default="scout", index=True)  # scout, team, institutional
+    monthly_export_limit = Column(Integer, default=100)
+    monthly_export_count = Column(Integer, default=0)
+    stripe_customer_id = Column(String, nullable=True, index=True)
+    stripe_subscription_id = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    users = relationship("UserModel", back_populates="organization", cascade="all, delete-orphan")
+
+class UserModel(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, default=lambda: f"usr_{uuid.uuid4().hex[:12]}")
+    organization_id = Column(String, ForeignKey("organizations.id"), nullable=False, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+    role = Column(String, default="analyst", index=True)  # admin, acquisition_director, analyst, auditor
+    is_active = Column(Boolean, default=True)
+    mfa_enabled = Column(Boolean, default=False)
+    mfa_secret = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    last_login_at = Column(DateTime, nullable=True)
+
+    organization = relationship("OrganizationModel", back_populates="users")
+
+class AuditLogModel(Base):
+    """
+    Immutable, append-only compliance audit ledger for CISO, SOC 2, and regulatory governance.
+    """
+    __tablename__ = "audit_logs"
+
+    id = Column(String, primary_key=True, default=lambda: f"aud_{uuid.uuid4().hex[:16]}")
+    organization_id = Column(String, index=True, nullable=False)
+    user_id = Column(String, index=True, nullable=True)
+    action = Column(String, index=True, nullable=False)  # AUTH_LOGIN, AUTH_MFA_SUCCESS, DEAL_EXPORT_CSV, etc.
+    resource_type = Column(String, nullable=True)
+    resource_id = Column(String, nullable=True)
+    ip_address = Column(String, nullable=True)
+    user_agent = Column(String, nullable=True)
+    details = Column(JSON, nullable=True)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
 
 class ListingModel(Base):
     __tablename__ = "listings"
 
     id = Column(Integer, primary_key=True, index=True)
     external_id = Column(String, unique=True, index=True, nullable=False)
+    organization_id = Column(String, index=True, default="org_default")
     title = Column(String, index=True, nullable=False)
     property_type = Column(String, index=True, nullable=False, default="Retail")
     price = Column(Float, index=True, nullable=False)
