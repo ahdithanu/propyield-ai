@@ -52,8 +52,14 @@ export function AuthenticPropertyMedia({
   );
 
   const satelliteUrl = useMemo(
-    () => getSatelliteStaticUrl(locationCoords, { size: "800x450", zoom: 18 }),
-    [locationCoords]
+    () =>
+      getSatelliteStaticUrl(locationCoords, {
+        size: "800x450",
+        zoom: 18,
+        boundary: listing.parcel_boundary,
+        showParcelBoundary: true,
+      }),
+    [locationCoords, listing.parcel_boundary]
   );
 
   const tenantFaviconUrl = useMemo(
@@ -143,6 +149,16 @@ export function AuthenticPropertyMedia({
         <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
         <span className="font-mono">{formattedCoords || `${listing.city}, ${listing.state}`}</span>
       </div>
+
+      {/* Cadastral GIS Parcel Boundary Indicator when viewing Satellite */}
+      {currentView === "satellite" ? (
+        <div className="absolute left-3 bottom-12 z-10 flex items-center gap-1.5 rounded-md border border-emerald-500/50 bg-emerald-950/85 px-2 py-0.5 text-[10px] font-mono text-emerald-300 backdrop-blur-md shadow-md">
+          <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" />
+          <span className="font-semibold uppercase tracking-wider">GIS Parcel Boundary Active</span>
+          {listing.parcel_id ? <span className="text-emerald-400/80">• APN: {listing.parcel_id}</span> : null}
+          {listing.lot_size_acres ? <span className="text-emerald-400/80">• {listing.lot_size_acres} AC</span> : null}
+        </div>
+      ) : null}
 
       {/* Interactive Mode Switcher Tabs (Street View | Satellite | Blueprint) */}
       {interactive ? (

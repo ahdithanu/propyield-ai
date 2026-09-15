@@ -31,6 +31,13 @@ export interface Listing {
   longitude?: number | null;
   tenant_domain?: string | null;
   tenant_name?: string | null;
+  parcel_id?: string | null;
+  lot_size_acres?: number | null;
+  lot_size_sqft?: number | null;
+  zoning_code?: string | null;
+  county?: string | null;
+  parcel_boundary?: [number, number][] | null;
+  county_gis_url?: string | null;
   description?: string | null;
   year_built?: number | null;
   noi?: number | null;

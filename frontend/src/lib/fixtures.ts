@@ -27,12 +27,32 @@ function build(
   address: string,
   latitude: number,
   longitude: number,
+function build(
+  id: string,
+  title: string,
+  city: string,
+  state: string,
+  zip: string,
+  type: string,
+  price: number,
+  cap: number,
+  sqft: number,
+  score: number,
+  address: string,
+  latitude: number,
+  longitude: number,
   tenant_name?: string,
   tenant_domain?: string,
+  parcel_id?: string,
+  lot_size_acres?: number,
+  zoning_code?: string,
+  county?: string,
+  county_gis_url?: string,
   customImage?: string
 ): Listing {
   const undervaluation = (score - 50) * 0.4;
   const predicted = Math.round(price * (1 + undervaluation / 100));
+  const lot_sqft = lot_size_acres ? Math.round(lot_size_acres * 43560) : null;
   return {
     id,
     title,
@@ -53,6 +73,12 @@ function build(
     longitude,
     tenant_name: tenant_name ?? null,
     tenant_domain: tenant_domain ?? null,
+    parcel_id: parcel_id ?? null,
+    lot_size_acres: lot_size_acres ?? null,
+    lot_size_sqft: lot_sqft,
+    zoning_code: zoning_code ?? null,
+    county: county ?? null,
+    county_gis_url: county_gis_url ?? null,
     year_built: 1998 + (Number(id.replace(/\D/g, "")) % 25),
     noi: Math.round((price * cap) / 100),
     description:
@@ -62,19 +88,19 @@ function build(
 }
 
 export const FIXTURE_LISTINGS: Listing[] = [
-  build("p-1", "Prime NNN Retail Center - Highway 183", "Austin", "TX", "78753", "Retail", 2750000, 6.85, 14200, 84, "8214 Research Blvd", 30.3667, -97.6942, "Walgreens / AutoZone NNN Pad", "walgreens.com"),
-  build("p-2", "Class A Distribution Warehouse - Grand Pkwy", "Houston", "TX", "77433", "Industrial", 8450000, 7.4, 96500, 91, "21400 Clay Rd", 29.8315, -95.7725, "FedEx Supply Chain Logistics", "fedex.com"),
-  build("p-3", "Brickell Medical Office Condo", "Miami", "FL", "33131", "Office", 4120000, 5.9, 18300, 62, "1450 Brickell Ave", 25.7617, -80.1918, "Baptist Health South Florida", "baptisthealth.net"),
-  build("p-4", "Sunbelt Garden Apartments - 84 Units", "Atlanta", "GA", "30318", "Multi-Family", 12600000, 6.1, 78400, 76, "1201 Marietta St NW", 33.7812, -84.4124, "Greystar Residential Services", "greystar.com"),
-  build("p-5", "Single-Tenant Auto Service - I-35 Frontage", "San Antonio", "TX", "78216", "Retail", 1950000, 7.85, 8600, 88, "9950 San Pedro Ave", 29.5312, -98.4981, "Firestone Complete Auto Care", "firestonecompleteautocare.com"),
-  build("p-6", "Infill Development Land - 4.2 Acres", "Tampa", "FL", "33607", "Land", 3200000, 4.2, 182000, 54, "4300 W Cypress St", 27.9525, -82.5182, "Cushman & Wakefield Commercial", "cushmanwakefield.com"),
-  build("p-7", "Creative Loft Office Campus", "Los Angeles", "CA", "90013", "Office", 15750000, 5.2, 62800, 41, "820 E 3rd St", 34.0458, -118.2341, "JLL Capital Markets Group", "jll.com"),
-  build("p-8", "Last-Mile Logistics Hub", "Jacksonville", "FL", "32218", "Industrial", 6300000, 7.95, 74200, 93, "1155 Busch Dr", 30.4328, -81.6582, "Amazon Freight Distribution Hub", "amazon.com"),
-  build("p-9", "Grocery-Anchored Strip Center", "Dallas", "TX", "75248", "Retail", 9850000, 6.65, 54100, 79, "17390 Preston Rd", 32.9868, -96.8041, "Whole Foods Market Anchor", "wholefoodsmarket.com"),
-  build("p-10", "Transit-Adjacent Mid-Rise Rental", "Brooklyn", "NY", "11217", "Multi-Family", 22400000, 4.6, 91200, 48, "470 Atlantic Ave", 40.6865, -73.9842, "Marcus & Millichap Institutional", "marcusmillichap.com"),
-  build("p-11", "Cold Storage Flex Facility", "Fresno", "CA", "93725", "Industrial", 5450000, 7.15, 61800, 81, "3410 S Chestnut Ave", 36.7025, -119.7428, "Lineage Logistics Cold Storage", "lineagelogistics.com"),
-  build("p-12", "Suburban Dental Retail Pad", "Savannah", "GA", "31405", "Retail", 1480000, 6.95, 5200, 72, "7805 Abercorn St", 31.9965, -81.1278, "Aspen Dental Healthcare", "aspendental.com"),
-  build("p-13", "Ocala Premier Apartment Community - 64 Units", "Ocala", "FL", "34471", "Multi-Family", 8900000, 6.4, 52000, 85, "1200 SW 27th Ave", 29.1872, -82.1401, "Lincoln Property Company", "lpc.com"),
+  build("p-1", "Prime NNN Retail Center - Highway 183", "Austin", "TX", "78753", "Retail", 2750000, 6.85, 14200, 84, "8214 Research Blvd", 30.3667, -97.6942, "Walgreens / AutoZone NNN Pad", "walgreens.com", "02-4412-0104-0000", 1.45, "CS-1-NP Commercial Services", "Travis Central Appraisal District", "https://stage.traviscad.org/propertysearch/"),
+  build("p-2", "Class A Distribution Warehouse - Grand Pkwy", "Houston", "TX", "77433", "Industrial", 8450000, 7.4, 96500, 91, "21400 Clay Rd", 29.8315, -95.7725, "FedEx Supply Chain Logistics", "fedex.com", "114-892-001-0002", 5.82, "I-1 Light Industrial Logistics", "Harris County Appraisal District", "https://hcad.org/property-search"),
+  build("p-3", "Brickell Medical Office Condo", "Miami", "FL", "33131", "Office", 4120000, 5.9, 18300, 62, "1450 Brickell Ave", 25.7617, -80.1918, "Baptist Health South Florida", "baptisthealth.net", "01-4138-042-0110", 0.88, "T6-48b-O Urban Core Medical", "Miami-Dade Property Appraiser", "https://www.miamidade.gov/pa/property_search.asp"),
+  build("p-4", "Sunbelt Garden Apartments - 84 Units", "Atlanta", "GA", "30318", "Multi-Family", 12600000, 6.1, 78400, 76, "1201 Marietta St NW", 33.7812, -84.4124, "Greystar Residential Services", "greystar.com", "14-0112-0004-082-1", 3.92, "RG-4 Multi-Family Residential", "Fulton County Board of Assessors", "https://qpublic.schneidercorp.com/Application.aspx?AppID=936"),
+  build("p-5", "Single-Tenant Auto Service - I-35 Frontage", "San Antonio", "TX", "78216", "Retail", 1950000, 7.85, 8600, 88, "9950 San Pedro Ave", 29.5312, -98.4981, "Firestone Complete Auto Care", "firestonecompleteautocare.com", "12044-002-0190", 1.12, "C-3 General Commercial", "Bexar Appraisal District", "https://www.bexaracad.org/"),
+  build("p-6", "Infill Development Land - 4.2 Acres", "Tampa", "FL", "33607", "Land", 3200000, 4.2, 182000, 54, "4300 W Cypress St", 27.9525, -82.5182, "Cushman & Wakefield Commercial", "cushmanwakefield.com", "108422-0000", 4.20, "CI Commercial Intensive", "Hillsborough County Property Appraiser", "https://www.hcpafl.org/"),
+  build("p-7", "Creative Loft Office Campus", "Los Angeles", "CA", "90013", "Office", 15750000, 5.2, 62800, 41, "820 E 3rd St", 34.0458, -118.2341, "JLL Capital Markets Group", "jll.com", "5163-018-024", 1.95, "M3 Heavy Commercial & Arts", "Los Angeles County Assessor", "https://portal.assessor.lacounty.gov/"),
+  build("p-8", "Last-Mile Logistics Hub", "Jacksonville", "FL", "32218", "Industrial", 6300000, 7.95, 74200, 93, "1155 Busch Dr", 30.4328, -81.6582, "Amazon Freight Distribution Hub", "amazon.com", "107412-0000", 4.85, "IL Industrial Light Distribution", "Duval County Property Appraiser", "https://www.coj.net/departments/property-appraiser"),
+  build("p-9", "Grocery-Anchored Strip Center", "Dallas", "TX", "75248", "Retail", 9850000, 6.65, 54100, 79, "17390 Preston Rd", 32.9868, -96.8041, "Whole Foods Market Anchor", "wholefoodsmarket.com", "0000042-001-010-0000", 4.10, "RR Regional Retail Center", "Dallas Central Appraisal District", "https://www.dallascad.org/"),
+  build("p-10", "Transit-Adjacent Mid-Rise Rental", "Brooklyn", "NY", "11217", "Multi-Family", 22400000, 4.6, 91200, 48, "470 Atlantic Ave", 40.6865, -73.9842, "Marcus & Millichap Institutional", "marcusmillichap.com", "3-00185-0012", 1.62, "C6-2A Special Downtown Mixed", "NYC Department of Finance", "https://zola.planning.nyc.gov/"),
+  build("p-11", "Cold Storage Flex Facility", "Fresno", "CA", "93725", "Industrial", 5450000, 7.15, 61800, 81, "3410 S Chestnut Ave", 36.7025, -119.7428, "Lineage Logistics Cold Storage", "lineagelogistics.com", "479-020-14", 3.80, "M-2 Heavy Industrial Storage", "Fresno County Assessor", "https://www.co.fresno.ca.us/departments/assessor"),
+  build("p-12", "Suburban Dental Retail Pad", "Savannah", "GA", "31405", "Retail", 1480000, 6.95, 5200, 72, "7805 Abercorn St", 31.9965, -81.1278, "Aspen Dental Healthcare", "aspendental.com", "2-0644-01-018", 0.94, "B-C Community Business District", "Chatham County Board of Assessors", "https://boa.chathamcountyga.gov/"),
+  build("p-13", "Ocala Premier Apartment Community - 64 Units", "Ocala", "FL", "34471", "Multi-Family", 8900000, 6.4, 52000, 85, "1200 SW 27th Ave", 29.1872, -82.1401, "Lincoln Property Company", "lpc.com", "23412-001-00", 3.65, "B-4 Regional Commercial / Multi", "Marion County Property Appraiser", "https://www.pa.marion.fl.us/"),
 ];
 
 export const FIXTURE_SUMMARY: MarketSummary = {
