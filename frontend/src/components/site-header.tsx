@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { UnderwriteDealModal } from "@/components/underwrite-deal-modal";
 import { PROPERTY_TYPES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,7 @@ export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
   const search = useSearch({ strict: false }) as { q?: string; type?: string };
   const [term, setTerm] = useState(search.q ?? "");
   const [open, setOpen] = useState(false);
+  const [underwriteOpen, setUnderwriteOpen] = useState(false);
   const activeType = search.type ?? "All";
 
   useEffect(() => setTerm(search.q ?? ""), [search.q]);
@@ -107,6 +109,14 @@ export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
               </Link>
             ))}
           </nav>
+
+          <Button
+            size="sm"
+            onClick={() => setUnderwriteOpen(true)}
+            className="hidden sm:inline-flex gap-1.5 bg-emerald font-semibold text-background hover:bg-emerald/90 shadow-sm"
+          >
+            <Sparkles className="size-3.5" /> Underwrite Deal
+          </Button>
 
           {onOpenDemo ? (
             <Button
@@ -195,6 +205,7 @@ export function SiteHeader({ onOpenDemo }: { onOpenDemo?: () => void }) {
           ))}
         </div>
       </div>
+      <UnderwriteDealModal open={underwriteOpen} onOpenChange={setUnderwriteOpen} />
     </header>
   );
 }

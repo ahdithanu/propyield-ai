@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Compass, Download, LayoutGrid, Rows3, Sparkles, MapPin } from "lucide-react";
+import { AlertTriangle, Compass, Download, LayoutGrid, Rows3, Sparkles, MapPin, Store, Building } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ import { PropertyTable } from "@/components/property-table";
 import { SiteHeader } from "@/components/site-header";
 import { DemoTourModal } from "@/components/demo-tour";
 import { IcMemoModal } from "@/components/ic-memo-modal";
+import { UnderwriteDealModal } from "@/components/underwrite-deal-modal";
 import { ValuationDrawer } from "@/components/valuation-drawer";
 import { formFromListing, type ValuationForm } from "@/components/valuation-panel";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,7 @@ function Dashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerForm, setDrawerForm] = useState<ValuationForm | undefined>(undefined);
   const [demoTourOpen, setDemoTourOpen] = useState(false);
+  const [underwriteOpen, setUnderwriteOpen] = useState(false);
   const [icMemoListing, setIcMemoListing] = useState<Listing | null>(null);
 
   const query: ListingQuery = useMemo(
@@ -128,7 +130,40 @@ function Dashboard() {
   const listings = useQuery(listingsQuery(query));
 
   const offline = Boolean(summary.data?.offline || listings.data?.offline);
-  const rows = listings.data?.data ?? [];
+
+  // Custom user-underwritten deals from localStorage
+  const [customDeals, setCustomDeals] = useState<Listing[]>([]);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("propyield_custom_deals");
+      if (stored) {
+        setCustomDeals(JSON.parse(stored) as Listing[]);
+      }
+    } catch {
+      // ignore
+    }
+  }, [underwriteOpen]);
+
+  const rows = useMemo(() => {
+    const apiRows = listings.data?.data ?? [];
+    if (!customDeals.length) return apiRows;
+
+    // Filter custom deals by current query criteria
+    const filteredCustom = customDeals.filter((d) => {
+      if (search.type !== "All" && d.property_type !== search.type) return false;
+      if (search.state !== "ALL" && d.state !== search.state) return false;
+      if (search.minPrice && d.listing_price < search.minPrice) return false;
+      if (search.maxPrice && d.listing_price > search.maxPrice) return false;
+      if (search.minCap && d.cap_rate < search.minCap) return false;
+      if (search.maxCap && d.cap_rate > search.maxCap) return false;
+      return true;
+    });
+
+    // Avoid duplicate IDs
+    const existingIds = new Set(apiRows.map((r) => String(r.id)));
+    const uniqueCustom = filteredCustom.filter((c) => !existingIds.has(String(c.id)));
+    return [...uniqueCustom, ...apiRows];
+  }, [listings.data?.data, customDeals, search]);
 
   useEffect(() => {
     if (search.q && listings.data && !listings.isFetching) {
@@ -250,14 +285,81 @@ function Dashboard() {
               ML-scored valuation, vector search, and graph centrality across the live CRE pipeline.
             </p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setUnderwriteOpen(true)}
+              className="gap-2 bg-emerald font-semibold text-background hover:bg-emerald/90 shadow-sm"
+            >
+              <Sparkles className="size-4" /> Underwrite Any Deal
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDemoTourOpen(true)}
+              className="gap-2 border border-emerald/40 bg-emerald-soft/40 text-emerald hover:bg-emerald-soft font-semibold"
+            >
+              <Compass className="size-4" /> Partner Walkthrough
+            </Button>
+          </div>
+        </section>
+
+        {/* 1-Click Buy Box Screeners */}
+        <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-border/80 bg-surface/50 p-3">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+            Institutional Buy Box Presets:
+          </span>
           <Button
             size="sm"
-            onClick={() => setDemoTourOpen(true)}
-            className="gap-2 border border-emerald/40 bg-emerald-soft text-emerald hover:bg-emerald-soft/80 font-semibold"
+            variant="outline"
+            className="h-8 gap-1.5 border-emerald/40 bg-emerald-soft/20 text-xs font-semibold text-emerald hover:bg-emerald-soft"
+            onClick={() => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  type: "Retail",
+                  minPrice: 1_500_000,
+                  maxPrice: 4_000_000,
+                  minSqft: 8_000,
+                  maxSqft: 25_000,
+                  minCap: 6.5,
+                  maxCap: 11,
+                }),
+              });
+              toast.success("Applied Small-Bay Neighborhood Strip Center Buy Box ($1.5M–$4M, 8k–25k SF)");
+            }}
           >
-            <Compass className="size-4" /> Start Partner Product Walkthrough
+            <Store className="size-3.5" /> Small-Bay Strip Center ($1.5M–$4M, 8k–25k SF)
           </Button>
-        </section>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 gap-1.5 border-blue-500/40 bg-blue-500/10 text-xs font-semibold text-blue-400 hover:bg-blue-500/20"
+            onClick={() => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  type: "Multi-Family",
+                  minPrice: 1_000_000,
+                  maxPrice: 3_000_000,
+                  minCap: 6.0,
+                  maxCap: 10,
+                }),
+              });
+              toast.success("Applied 16–32 Unit Multifamily Buy Box ($1M–$3M)");
+            }}
+          >
+            <Building className="size-3.5" /> 16–32 Unit Multifamily ($1M–$3M)
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 text-xs text-muted-foreground hover:text-foreground ml-auto"
+            onClick={resetFilters}
+          >
+            Clear Presets
+          </Button>
+        </div>
 
         <KpiCards data={summary.data?.data} loading={summary.isLoading} />
 
@@ -362,6 +464,7 @@ function Dashboard() {
 
       <ValuationDrawer open={drawerOpen} onOpenChange={setDrawerOpen} initial={drawerForm} />
       <DemoTourModal open={demoTourOpen} onOpenChange={setDemoTourOpen} onSelectStepAction={handleStepAction} />
+      <UnderwriteDealModal open={underwriteOpen} onOpenChange={setUnderwriteOpen} />
       <IcMemoModal listing={icMemoListing} open={Boolean(icMemoListing)} onOpenChange={(o) => !o && setIcMemoListing(null)} />
     </div>
   );

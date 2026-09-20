@@ -38,6 +38,47 @@ export interface Listing {
   county?: string | null;
   parcel_boundary?: [number, number][] | null;
   county_gis_url?: string | null;
+  
+  // Buy Box & Bay Architecture
+  bays_count?: number | null;
+  anchor_type?: "Unanchored" | "Shadow-Anchored" | "Grocery-Anchored" | "Single-Tenant" | null;
+  shadow_anchor_name?: string | null;
+  occupancy_pct?: number | null;
+  max_tenant_pct?: number | null;
+  restaurant_pct?: number | null;
+  service_tenant_pct?: number | null;
+  
+  // Big 3 Capex & Useful Life Ledger
+  roof_type?: string | null;
+  roof_age_years?: number | null;
+  roof_rul_years?: number | null;
+  roof_replacement_est?: number | null;
+  hvac_units_count?: number | null;
+  hvac_avg_age_years?: number | null;
+  hvac_over_12yr_count?: number | null;
+  hvac_replacement_est?: number | null;
+  parking_stalls?: number | null;
+  parking_ratio?: number | null;
+  parking_condition?: string | null;
+  parking_reseal_est?: number | null;
+  
+  // Micro-Location & Traffic
+  traffic_vpd?: number | null;
+  intersection_type?: string | null;
+  radius_3mi_population?: number | null;
+  radius_3mi_pop_growth_pct?: number | null;
+  
+  // Lease Structure & WALT
+  lease_structure?: "NNN" | "Modified NNN" | "Gross" | null;
+  walt_years?: number | null;
+  in_place_rent_psf?: number | null;
+  market_rent_psf?: number | null;
+  
+  // Multifamily Buy Box (16-32 Units)
+  unit_count?: number | null;
+  price_per_unit?: number | null;
+  unit_mix_desc?: string | null;
+  
   description?: string | null;
   year_built?: number | null;
   noi?: number | null;

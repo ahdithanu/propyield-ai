@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ValuationPanel, formFromListing } from "@/components/valuation-panel";
+import { BuyBoxScorecard } from "@/components/buy-box-scorecard";
 import { listingsQuery } from "@/lib/api";
 import { money, money2, num, pct } from "@/lib/format";
 
@@ -143,6 +144,9 @@ function PropertyDetail() {
                 </div>
               </div>
             </div>
+
+            {/* Acquisition Buy Box Scorecard & Pre-LOI Diligence */}
+            <BuyBoxScorecard listing={listing} />
 
             {/* Cadastral Parcel Intelligence & GIS Boundaries */}
             <div className="glass rounded-2xl p-5 lg:p-6 space-y-4">
