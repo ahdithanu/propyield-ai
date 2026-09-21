@@ -9,6 +9,7 @@ from app.db.database import init_db
 from app.db.init_data import seed_default_organization_and_users
 from app.api.v1.router import api_router
 from app.pipeline.looped_runner import looped_engine
+from app.pipeline.cron_scheduler import cron_scheduler
 from app.core.config import settings
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
@@ -24,7 +25,11 @@ async def lifespan(app: FastAPI):
         await looped_engine.run_pipeline_iteration()
     except Exception as e:
         print(f"Initial pipeline sync notice: {e}")
+    # 4. Start automated background cron scheduler for continuous daily deal sourcing
+    cron_scheduler.start()
     yield
+    # 5. Gracefully shutdown background scheduler
+    cron_scheduler.stop()
 
 app = FastAPI(
     title="PropYield AI - Enterprise Commercial Real Estate Engine",

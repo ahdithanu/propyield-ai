@@ -7,11 +7,13 @@ from app.api.v1.endpoints import (
     analytics,
     auth,
     audit,
-    billing
+    billing,
+    pipeline_endpoints
 )
 
 api_router = APIRouter()
 
+api_router.include_router(pipeline_endpoints.router, prefix="/pipeline", tags=["Pipeline & Daily Sourcing Cron"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & Access"])
 api_router.include_router(audit.router, prefix="/audit", tags=["Compliance & Audit"])
 api_router.include_router(billing.router, prefix="/billing", tags=["Monetization & Subscriptions"])

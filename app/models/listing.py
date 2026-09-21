@@ -18,6 +18,31 @@ class ListingBase(BaseModel):
     tenant_domain: Optional[str] = Field(None, description="Verified corporate domain of anchor tenant or listing brokerage")
     tenant_name: Optional[str] = Field(None, description="Name of corporate anchor tenant or listing firm")
     description: Optional[str] = None
+    bays_count: Optional[int] = Field(None, description="Number of bays")
+    anchor_type: Optional[str] = Field(None, description="Unanchored, shadow_anchored, or single_tenant")
+    shadow_anchor_name: Optional[str] = Field(None, description="Name of adjacent shadow anchor")
+    occupancy_pct: Optional[float] = Field(None, description="Occupancy percentage")
+    max_tenant_pct: Optional[float] = Field(None, description="Concentration of largest single tenant")
+    restaurant_pct: Optional[float] = Field(None, description="Restaurant rent roll share")
+    service_tenant_pct: Optional[float] = Field(None, description="Service and necessity tenant share")
+    roof_type: Optional[str] = None
+    roof_age_years: Optional[int] = None
+    roof_rul_years: Optional[int] = None
+    roof_replacement_est: Optional[float] = None
+    hvac_units_count: Optional[int] = None
+    hvac_avg_age_years: Optional[int] = None
+    hvac_over_12yr_count: Optional[int] = None
+    hvac_replacement_est: Optional[float] = None
+    parking_stalls: Optional[int] = None
+    parking_ratio: Optional[float] = None
+    parking_condition: Optional[str] = None
+    parking_reseal_est: Optional[float] = None
+    traffic_vpd: Optional[int] = None
+    intersection_type: Optional[str] = None
+    lease_structure: Optional[str] = None
+    walt_years: Optional[float] = None
+    unit_count: Optional[int] = None
+    price_per_unit: Optional[float] = None
 
 class ListingCreate(ListingBase):
     raw_data: Optional[Dict[str, Any]] = None

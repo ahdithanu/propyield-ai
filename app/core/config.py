@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./crexi_realestate.db")
 
+    # Automated Lead Ingestion Cron Settings
+    CRON_ENABLED: bool = os.getenv("CRON_ENABLED", "true").lower() in ("true", "1", "yes")
+    CRON_INTERVAL_HOURS: float = float(os.getenv("CRON_INTERVAL_HOURS", "24.0"))
+
     class Config:
         case_sensitive = True
 
