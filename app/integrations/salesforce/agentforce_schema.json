@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PropYield AI - Salesforce Agentforce CRE Action API",
+    "description": "Standardized OpenAPI 3.0 specification exposing PropYield AI tools as Salesforce Invocable Actions for Agentforce Atlas Reasoning Engine.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://propyield-backend.onrender.com/api/v1",
+      "description": "Production Agentforce Endpoint"
+    }
+  ],
+  "paths": {
+    "/pipeline/underwrite-action": {
+      "post": {
+        "summary": "Underwrite Deal Action",
+        "description": "Evaluates commercial property against the buyer's Buy Box, checks Big 3 Capex RUL, and computes recommended LOI strike price.",
+        "operationId": "UnderwriteCommercialDeal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["address", "asking_price", "sqft", "bays_count"],
+                "properties": {
+                  "address": { "type": "string", "example": "5910 Karl Rd, Columbus, OH" },
+                  "asking_price": { "type": "number", "example": 2350000 },
+                  "sqft": { "type": "number", "example": 14800 },
+                  "bays_count": { "type": "integer", "example": 7 },
+                  "roof_age_years": { "type": "integer", "example": 6 },
+                  "hvac_over_12yr_count": { "type": "integer", "example": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Underwriting verdict and strike price",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "buy_box_verdict": { "type": "string", "enum": ["PASS", "CAUTION", "FAIL"] },
+                    "loi_strike_price": { "type": "number" },
+                    "total_capex_deductions": { "type": "number" },
+                    "cadastral_apn": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
