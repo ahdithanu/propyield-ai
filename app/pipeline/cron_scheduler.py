@@ -42,12 +42,13 @@ class PipelineCronScheduler:
             self._task.cancel()
             logger.info("Pipeline Cron Scheduler canceled.")
 
-    async def run_now(self) -> Dict[str, Any]:
+    async def run_now(self, region_filter: Optional[str] = None, per_market: int = 2) -> Dict[str, Any]:
         """
-        Manually trigger an immediate lead ingestion cron run.
+        Manually trigger an immediate nationwide lead ingestion cron run.
+        Optionally filters to a specific US economic region (e.g. SOUTHEAST, MIDWEST, WEST_COAST).
         """
-        logger.info("Manual lead ingestion cron run triggered.")
-        summary = await looped_engine.run_pipeline_iteration()
+        logger.info(f"Manual nationwide lead ingestion triggered (Region: {region_filter or 'ALL'}).")
+        summary = await looped_engine.run_pipeline_iteration(region_filter=region_filter, per_market=per_market)
         self.last_run_at = datetime.utcnow()
         self.last_run_summary = summary
         self.total_runs += 1
@@ -58,6 +59,9 @@ class PipelineCronScheduler:
         interval_seconds = max(60, int(settings.CRON_INTERVAL_HOURS * 3600))
         logger.info(f"Pipeline cron loop active. Cycle interval: {interval_seconds}s ({settings.CRON_INTERVAL_HOURS}h).")
 
+        cycle_regions = ["ALL", "SOUTHEAST", "MIDWEST", "SOUTH_CENTRAL", "SOUTHWEST_MOUNTAIN", "WEST_COAST", "NORTHEAST"]
+        cycle_idx = 0
+
         while self._running:
             try:
                 self.next_run_at = datetime.fromtimestamp(datetime.utcnow().timestamp() + interval_seconds)
@@ -67,12 +71,14 @@ class PipelineCronScheduler:
                 if not self._running:
                     break
 
-                logger.info("Executing scheduled daily lead ingestion cycle...")
-                summary = await looped_engine.run_pipeline_iteration()
+                target_reg = None if cycle_regions[cycle_idx % len(cycle_regions)] == "ALL" else cycle_regions[cycle_idx % len(cycle_regions)]
+                logger.info(f"Executing scheduled nationwide lead ingestion cycle (Target: {target_reg or 'ALL_REGIONS'})...")
+                summary = await looped_engine.run_pipeline_iteration(region_filter=target_reg, per_market=2)
                 self.last_run_at = datetime.utcnow()
                 self.last_run_summary = summary
                 self.total_runs += 1
                 self.total_leads_ingested += summary.get("cleaned_ingested", 0)
+                cycle_idx += 1
                 logger.info(f"Scheduled lead ingestion completed: {summary.get('cleaned_ingested', 0)} leads processed.")
             except asyncio.CancelledError:
                 logger.info("Pipeline cron loop cancelled.")

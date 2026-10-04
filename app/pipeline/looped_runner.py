@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from sqlalchemy.future import select
 
 from app.db.database import AsyncSessionLocal
@@ -23,11 +23,15 @@ class LoopedPipelineEngine:
         self.iteration_count = 0
         self.stealth_delay_ms = 1000
 
-    async def run_pipeline_iteration(self) -> Dict[str, Any]:
+    async def run_pipeline_iteration(
+        self,
+        region_filter: Optional[str] = None,
+        per_market: int = 2
+    ) -> Dict[str, Any]:
         """
-        Executes 1 full iteration of the Looped Closed-Loop Pipeline Architecture.
+        Executes 1 full iteration of the Looped Closed-Loop Pipeline Architecture nationwide.
         Steps:
-          1. Extraction
+          1. Extraction across nationwide commercial hubs
           2. Data Quality & Anomaly Audit
           3. Feature Engineering
           4. Property Graph Construction
@@ -37,10 +41,10 @@ class LoopedPipelineEngine:
           8. Database Upsert
         """
         self.iteration_count += 1
-        logger.info(f"--- Starting Looped Pipeline Iteration #{self.iteration_count} ---")
+        logger.info(f"--- Starting Looped Pipeline Iteration #{self.iteration_count} (Region: {region_filter or 'NATIONWIDE'}) ---")
 
         # Step 1: Extraction
-        raw_listings = await self.scraper.extract_listings()
+        raw_listings = await self.scraper.extract_listings(region_filter=region_filter, per_market=per_market)
         raw_count = len(raw_listings)
 
         # Step 2: Data Quality Audit
