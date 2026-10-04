@@ -51,6 +51,7 @@ async def search_listings(
     if max_sqft is not None:
         query = query.where(ListingModel.sqft <= max_sqft)
 
+    query = query.order_by(ListingModel.id.desc())
     offset = (page - 1) * limit
     query = query.offset(offset).limit(limit)
 
