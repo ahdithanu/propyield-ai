@@ -1,4 +1,5 @@
 import secrets
+import hashlib
 import base64
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, Union
@@ -7,10 +8,20 @@ import bcrypt
 import pyotp
 from app.core.config import settings
 
+def _normalize_password_bytes(password: str) -> bytes:
+    """
+    Ensures passwords exceeding bcrypt's 72-byte limit are pre-hashed with SHA-256
+    rather than silently truncated (fixes SEC-006).
+    """
+    raw_bytes = password.encode("utf-8")
+    if len(raw_bytes) > 72:
+        return hashlib.sha256(raw_bytes).hexdigest().encode("utf-8")
+    return raw_bytes
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifies a plain password against its bcrypt hash."""
     try:
-        password_bytes = plain_password.encode('utf-8')[:72]
+        password_bytes = _normalize_password_bytes(plain_password)
         hashed_bytes = hashed_password.encode('utf-8')
         return bcrypt.checkpw(password_bytes, hashed_bytes)
     except Exception:
@@ -18,7 +29,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     """Generates a secure bcrypt password hash."""
-    password_bytes = password.encode('utf-8')[:72]
+    password_bytes = _normalize_password_bytes(password)
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 

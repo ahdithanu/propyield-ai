@@ -11,6 +11,7 @@ from app.pipeline.feature_store import feature_store
 from app.graph.property_graph import graph_engine
 from app.ml.valuation_model import valuation_model
 from app.ml.semantic_engine import semantic_engine
+from app.rag.hybrid_retriever import hybrid_retriever
 from app.harness.evaluation_harness import eval_harness
 from app.models.listing import HarnessEvalReport
 
@@ -36,7 +37,7 @@ class LoopedPipelineEngine:
           3. Feature Engineering
           4. Property Graph Construction
           5. ML Model Training & Valuation Inference
-          6. Vector Embedding Indexing
+          6. Vector Embedding & Hybrid RAG Indexing
           7. Evaluation Harness Audit & Closed-Loop Adaptive Calibration
           8. Database Upsert
         """
@@ -73,8 +74,32 @@ class LoopedPipelineEngine:
             item["predicted_price"] = val_res.estimated_price
             item["undervaluation_score"] = val_res.undervaluation_score
 
-        # Step 6: Vector Indexing for Semantic Search
+        # Step 6: Vector Indexing for Semantic Search & Enterprise Hybrid RAG
         semantic_engine.fit_documents(engineered_listings)
+        rag_docs = [
+            {
+                "chunk_id": f"chunk_{item.get('external_id', idx)}",
+                "text": (
+                    f"{item.get('title', '')} ({item.get('property_type', 'Commercial')}) in {item.get('city', '')}, {item.get('state', '')}. "
+                    f"Asking Price: ${item.get('price', 0):,.0f}, Cap Rate: {item.get('cap_rate', 0)}%, SqFt: {item.get('sqft', 0):,.0f}, "
+                    f"Bays: {item.get('bays_count', 0)}, Occupancy: {item.get('occupancy_pct', 0)}%, "
+                    f"Shadow Anchor: {item.get('shadow_anchor_name', 'N/A')}, Roof RUL: {item.get('roof_rul_years', 0)} yrs. "
+                    f"{item.get('description', '')}"
+                ),
+                "document_name": f"OM_{item.get('external_id', idx)}.pdf",
+                "organization_id": "org_default",
+                "allowed_roles": ["analyst", "acquisition_director", "admin", "auditor"],
+                "metadata": {
+                    "external_id": item.get("external_id"),
+                    "city": item.get("city"),
+                    "state": item.get("state"),
+                    "price": item.get("price"),
+                    "cap_rate": item.get("cap_rate")
+                }
+            }
+            for idx, item in enumerate(engineered_listings)
+        ]
+        hybrid_retriever.index_documents(rag_docs)
 
         # Step 7: Evaluation Harness Suite
         report: HarnessEvalReport = eval_harness.run_evaluation(

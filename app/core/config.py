@@ -23,8 +23,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "14"))
     
-    # Guest / Demo sandbox support
-    DEMO_MODE_ALLOWED: bool = os.getenv("DEMO_MODE_ALLOWED", "true").lower() in ("true", "1", "yes")
+    # Guest / Demo sandbox support (defaults to False in production, True in dev/test)
+    DEMO_MODE_ALLOWED: bool = os.getenv(
+        "DEMO_MODE_ALLOWED",
+        "false" if os.getenv("ENVIRONMENT", "development").lower() == "production" else "true"
+    ).lower() in ("true", "1", "yes")
     
     # CORS Configuration
     _DEFAULT_DEV_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:8000,http://localhost:8080"

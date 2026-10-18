@@ -5,7 +5,8 @@ from sqlalchemy.future import select
 from sqlalchemy import func
 
 from app.db.database import get_db
-from app.db.models import ListingModel
+from app.db.models import ListingModel, UserModel
+from app.api.deps import get_current_user
 from app.models.listing import ListingResponse, ListingFilterParams
 from app.pipeline.looped_runner import looped_engine
 
@@ -81,9 +82,10 @@ async def get_listing(id: int, db: AsyncSession = Depends(get_db)):
     return listing
 
 @router.post("/trigger-scrape")
-async def trigger_pipeline_scrape():
+async def trigger_pipeline_scrape(current_user: UserModel = Depends(get_current_user)):
     """
     Triggers an on-demand iteration of the closed-loop ingestion pipeline.
+    Requires authenticated user context.
     """
     summary = await looped_engine.run_pipeline_iteration()
     return {"message": "Pipeline iteration completed successfully", "summary": summary}

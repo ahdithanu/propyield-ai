@@ -1,22 +1,50 @@
+import os
+from pathlib import Path
+import joblib
 import numpy as np
 import pandas as pd
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
 from app.models.listing import MLValuationResponse
 
+DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[2] / "data" / "valuation_model.joblib"
+
 class PropertyValuationMLModel:
-    def __init__(self):
+    def __init__(self, artifact_path: Optional[Path] = None):
+        self.artifact_path = artifact_path or DEFAULT_MODEL_PATH
         self.model = RandomForestRegressor(n_estimators=50, random_state=42)
         self.encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
         self.is_trained = False
+        self._load_artifact_if_exists()
+
+    def _load_artifact_if_exists(self) -> bool:
+        try:
+            if self.artifact_path.exists():
+                bundle = joblib.load(self.artifact_path)
+                self.model = bundle["model"]
+                self.encoder = bundle["encoder"]
+                self.is_trained = True
+                return True
+        except Exception:
+            self.is_trained = False
+        return False
+
+    def _save_artifact(self) -> None:
+        try:
+            self.artifact_path.parent.mkdir(parents=True, exist_ok=True)
+            joblib.dump({"model": self.model, "encoder": self.encoder}, self.artifact_path)
+        except Exception:
+            pass
 
     def train_model(self, training_listings: List[Dict[str, Any]]):
         """
-        Trains ML regression model on property attributes (sqft, cap_rate, property_type, state).
+        Trains ML regression model on property attributes (sqft, cap_rate, property_type, state)
+        and persists model weights to disk via joblib.
         """
         if not training_listings or len(training_listings) < 3:
-            self.is_trained = False
+            if not self.is_trained:
+                self._load_artifact_if_exists()
             return
 
         df = pd.DataFrame(training_listings)
@@ -30,6 +58,7 @@ class PropertyValuationMLModel:
 
         self.model.fit(X, y)
         self.is_trained = True
+        self._save_artifact()
 
     def predict_valuation(self, property_type: str, sqft: float, city: str, state: str, cap_rate: float, list_price: float = 0.0) -> MLValuationResponse:
         """

@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 class SemanticVectorSearchEngine:
     def __init__(self):
-        self.vectorizer = TfidfVectorizer(stop_words='english')
+        self.vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 2), sublinear_tf=True)
         self.tfidf_matrix = None
         self.listings: List[Dict[str, Any]] = []
 
@@ -17,7 +17,7 @@ class SemanticVectorSearchEngine:
             return
 
         documents = [
-            f"{item.get('title', '')} {item.get('property_type', '')} {item.get('city', '')} {item.get('state', '')} {item.get('description', '')}"
+            f"{item.get('title', '')} {item.get('property_type', '')} {item.get('city', '')} {item.get('state', '')} {item.get('description', '')} {item.get('shadow_anchor_name', '')} {item.get('lease_structure', '')}"
             for item in listings
         ]
 
@@ -26,8 +26,9 @@ class SemanticVectorSearchEngine:
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """
         Vector search matching natural language query string against vector embeddings.
+        Returns only genuine matches with cosine similarity > 0.0 (no fabricated fallbacks).
         """
-        if self.tfidf_matrix is None or not self.listings:
+        if self.tfidf_matrix is None or not self.listings or not query.strip():
             return []
 
         query_vec = self.vectorizer.transform([query])
@@ -42,10 +43,6 @@ class SemanticVectorSearchEngine:
                 item = self.listings[idx].copy()
                 item["semantic_match_score"] = score
                 results.append(item)
-
-        # Fallback: if zero score matches, return first top_k
-        if not results and self.listings:
-            results = [dict(item, semantic_match_score=0.10) for item in self.listings[:top_k]]
 
         return results
 

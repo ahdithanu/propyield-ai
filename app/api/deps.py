@@ -39,8 +39,8 @@ async def get_current_user_optional(
         except jwt.PyJWTError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
 
-    # Guest Demo Fallback (when running in public demo mode)
-    if settings.DEMO_MODE_ALLOWED:
+    # Guest Demo Fallback (only when DEMO_MODE_ALLOWED is enabled and not in strict production mode)
+    if settings.DEMO_MODE_ALLOWED and settings.ENVIRONMENT != "production":
         stmt = select(UserModel).where(UserModel.id == "usr_analyst_1")
         res = await db.execute(stmt)
         demo_user = res.scalars().first()

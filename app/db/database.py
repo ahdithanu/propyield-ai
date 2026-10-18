@@ -7,13 +7,27 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./crexi_realestate.db")
 
-# Ensure sqlite engine compatibility
+# Automatically normalize PostgreSQL URLs from hosting providers (Render, Supabase, Neon, AWS RDS, Heroku)
+# Hosting providers provide "postgres://" or "postgresql://" which requires "postgresql+asyncpg://" for SQLAlchemy Async
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+asyncpg://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+# Ensure engine compatibility & pooling
 if DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+    engine_kwargs = {"connect_args": connect_args}
 else:
     connect_args = {}
+    engine_kwargs = {
+        "connect_args": connect_args,
+        "pool_size": 10,
+        "max_overflow": 20,
+        "pool_pre_ping": True
+    }
 
-engine = create_async_engine(DATABASE_URL, connect_args=connect_args, echo=False)
+engine = create_async_engine(DATABASE_URL, echo=False, **engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
@@ -38,13 +52,20 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         
-        # Schema migration helper for existing SQLite databases
-        # Query existing columns in 'listings' table
-        try:
-            res = await conn.execute(text("PRAGMA table_info(listings)"))
-            existing_cols = {row[1] for row in res.fetchall()}
-        except Exception:
-            existing_cols = set()
+        # Schema migration helper for SQLite & PostgreSQL
+        is_sqlite = DATABASE_URL.startswith("sqlite")
+        if is_sqlite:
+            try:
+                res = await conn.execute(text("PRAGMA table_info(listings)"))
+                existing_cols = {row[1] for row in res.fetchall()}
+            except Exception:
+                existing_cols = set()
+        else:
+            try:
+                res = await conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = 'listings'"))
+                existing_cols = {row[0] for row in res.fetchall()}
+            except Exception:
+                existing_cols = set()
 
         # Columns added in subsequent feature releases
         column_definitions = {
@@ -81,7 +102,10 @@ async def init_db():
         for col, col_type in column_definitions.items():
             if col not in existing_cols:
                 try:
-                    await conn.execute(text(f"ALTER TABLE listings ADD COLUMN {col} {col_type}"))
+                    if is_sqlite:
+                        await conn.execute(text(f"ALTER TABLE listings ADD COLUMN {col} {col_type}"))
+                    else:
+                        await conn.execute(text(f"ALTER TABLE listings ADD COLUMN IF NOT EXISTS {col} {col_type}"))
                 except Exception:
                     pass
 

@@ -77,6 +77,10 @@ class FastIntentClassifier:
             re.compile(r"\b(joke|riddle|poem|song|story)\b", re.IGNORECASE),
             re.compile(r"\b(recipe|cook|bake|movie|celebrity|sports|nfl|nba)\b", re.IGNORECASE)
         ]
+        self.deal_underwrite_pattern = re.compile(
+            r"\b(underwrite|underwriting|strike\s+price|loi\s+offer|buy\s+box|capex|roof\s+rul)\b",
+            re.IGNORECASE
+        )
 
     def classify(self, text: str) -> Dict[str, Any]:
         start_time = time.perf_counter()
@@ -94,6 +98,18 @@ class FastIntentClassifier:
                     "should_divert": True,
                     "canned_response": "I am PropYield AI's commercial real estate underwriting copilot. I specialize in commercial property search, buy box underwriting, and market analytics. I cannot answer weather or general queries."
                 }
+
+        if self.deal_underwrite_pattern.search(normalized):
+            latency_ms = round((time.perf_counter() - start_time) * 1000, 3)
+            return {
+                "intent": IntentType.DEAL_UNDERWRITE,
+                "confidence": 0.96,
+                "similarity_score": 0.96,
+                "latency_ms": latency_ms,
+                "fast_path": True,
+                "should_divert": False,
+                "canned_response": None
+            }
 
         # Fast-Path 2: Vector similarity routing against intent clusters (<10ms)
         query_vec = self.vectorizer.transform([normalized])
