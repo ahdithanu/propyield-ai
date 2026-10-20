@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { underwriteDealAction } from "@/lib/api";
 import type { Listing } from "@/lib/types";
 
 interface UnderwriteDealModalProps {
@@ -59,13 +60,27 @@ export function UnderwriteDealModal({ open, onOpenChange, onDealCreated }: Under
   const [tenantName, setTenantName] = useState("State Farm / Great Clips / Dental Care");
   const [tenantDomain, setTenantDomain] = useState("statefarm.com");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
+    const apiResult = await underwriteDealAction({
+      address: `${address}, ${city}, ${state}`,
+      asking_price: price,
+      sqft,
+      bays_count: baysCount,
+      roof_age_years: roofAge,
+      hvac_over_12yr_count: hvacOver12yr,
+      parking_reseal_est: 0,
+      occupancy_pct: occupancyPct,
+    });
 
     const pricePerSqft = Math.round(price / Math.max(sqft, 1));
     const ppsfValuation = type === "Retail" ? 195 : 120;
-    const fairMarketPrice = Math.round(sqft * ppsfValuation);
-    const undervaluationPct = Number((((fairMarketPrice - price) / fairMarketPrice) * 100).toFixed(1));
+    const fairMarketPrice = apiResult?.loi_strike_price ?? Math.round(sqft * ppsfValuation);
+    const undervaluationPct = Number((((fairMarketPrice - price) / Math.max(1, fairMarketPrice)) * 100).toFixed(1));
     const dealScore = Math.min(99, Math.max(1, Math.round(50 + undervaluationPct * 2.2)));
 
     // Approximate geocodes for known cities or fallback
@@ -100,7 +115,7 @@ export function UnderwriteDealModal({ open, onOpenChange, onDealCreated }: Under
       longitude: lng,
       tenant_name: tenantName,
       tenant_domain: tenantDomain,
-      parcel_id: `${state.toUpperCase()}-CAD-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(100 + Math.random() * 900)}`,
+      parcel_id: apiResult?.cadastral_apn ?? `${state.toUpperCase()}-CAD-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(100 + Math.random() * 900)}`,
       lot_size_acres: Number((sqft / 10000).toFixed(2)),
       lot_size_sqft: Math.round(sqft * 4.3),
       zoning_code: type === "Retail" ? "C-2 General Commercial" : "R-4 Multi-Family",
@@ -116,7 +131,7 @@ export function UnderwriteDealModal({ open, onOpenChange, onDealCreated }: Under
       roof_type: "TPO Membrane",
       roof_age_years: roofAge,
       roof_rul_years: Math.max(1, 20 - roofAge),
-      roof_replacement_est: roofAge > 15 ? Math.round(sqft * 8.5) : 0,
+      roof_replacement_est: roofAge >= 15 ? Math.round(sqft * 8.5) : 0,
       hvac_units_count: hvacUnits,
       hvac_avg_age_years: roofAge,
       hvac_over_12yr_count: hvacOver12yr,
@@ -132,7 +147,9 @@ export function UnderwriteDealModal({ open, onOpenChange, onDealCreated }: Under
       market_rent_psf: 19.5,
       year_built: yearBuilt,
       noi: Math.round((price * capRate) / 100),
-      description: `User-underwritten ${type.toLowerCase()} asset in ${city}, ${state}. Evaluated against personal acquisition buy box criteria.`,
+      description: apiResult
+        ? `Agentforce Underwriting Verdict: ${apiResult.buy_box_verdict} | Recommended LOI Strike Price: $${apiResult.loi_strike_price.toLocaleString()} (Big 3 CapEx Reserve: $${apiResult.total_capex_deductions.toLocaleString()}).`
+        : `User-underwritten ${type.toLowerCase()} asset in ${city}, ${state}. Evaluated against personal acquisition buy box criteria.`,
       external_url: "https://www.crexi.com/properties",
     };
 
@@ -146,6 +163,7 @@ export function UnderwriteDealModal({ open, onOpenChange, onDealCreated }: Under
       // ignore
     }
 
+    setSubmitting(false);
     if (onDealCreated) {
       onDealCreated(newDeal);
     }
@@ -405,8 +423,8 @@ export function UnderwriteDealModal({ open, onOpenChange, onDealCreated }: Under
             <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="bg-emerald text-black font-bold hover:bg-emerald/90 gap-1.5">
-              <Sparkles className="size-3.5" /> Run Buy Box Underwriting &amp; Scorecard
+            <Button type="submit" size="sm" disabled={submitting} className="bg-emerald text-black font-bold hover:bg-emerald/90 gap-1.5">
+              <Sparkles className="size-3.5" /> {submitting ? "Executing Agentforce Underwriting…" : "Run Buy Box Underwriting & Scorecard"}
             </Button>
           </div>
         </form>

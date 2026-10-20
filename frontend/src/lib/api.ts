@@ -72,13 +72,18 @@ const n = (v: unknown, d = 0) => {
 };
 const s = (v: unknown, d = "") => (typeof v === "string" && v.length ? v : d);
 
-/** Tolerant normalizer: backends vary in field naming. */
+/** Tolerant normalizer: maps all 28 core + Buy Box & Big 3 CapEx fields from backend payload. */
 function toListing(raw: Record<string, unknown>, i: number): Listing {
   const type = s(raw["property_type"] ?? raw["type"] ?? raw["asset_type"], "Retail");
   const price = n(raw["listing_price"] ?? raw["price"] ?? raw["list_price"]);
   const sqft = n(raw["sqft"] ?? raw["square_feet"] ?? raw["building_sqft"], 1);
   const predicted = n(raw["ml_predicted_price"] ?? raw["predicted_price"] ?? raw["fair_market_value"], price);
   const under = raw["undervaluation_pct"];
+  const optNum = (key: string): number | null =>
+    raw[key] !== undefined && raw[key] !== null ? n(raw[key]) : null;
+  const optStr = (key: string): string | null =>
+    raw[key] !== undefined && raw[key] !== null && String(raw[key]).length > 0 ? String(raw[key]) : null;
+
   return {
     id: s(raw["id"] ?? raw["external_id"] ?? raw["listing_id"] ?? raw["_id"], `listing-${i}`),
     title: s(raw["title"] ?? raw["name"], "Commercial Property"),
@@ -90,7 +95,7 @@ function toListing(raw: Record<string, unknown>, i: number): Listing {
     listing_price: price,
     cap_rate: n(raw["cap_rate"] ?? raw["caprate"]),
     sqft,
-    price_per_sqft: n(raw["price_per_sqft"] ?? raw["price_psf"], sqft ? price / sqft : 0),
+    price_per_sqft: n(raw["price_per_sqft"] ?? raw["price_psf"], sqft ? Math.round((price / sqft) * 100) / 100 : 0),
     deal_score: n(raw["deal_score"] ?? raw["undervaluation_score"] ?? raw["score"]),
     ml_predicted_price: predicted,
     undervaluation_pct:
@@ -100,19 +105,44 @@ function toListing(raw: Record<string, unknown>, i: number): Listing {
           ? Number((((predicted - price) / predicted) * 100).toFixed(1))
           : 0,
     image_url: raw["image_url"] ? s(raw["image_url"]) : null,
-    latitude: raw["latitude"] !== undefined && raw["latitude"] !== null ? n(raw["latitude"]) : null,
-    longitude: raw["longitude"] !== undefined && raw["longitude"] !== null ? n(raw["longitude"]) : null,
+    latitude: optNum("latitude"),
+    longitude: optNum("longitude"),
     tenant_domain: s(raw["tenant_domain"] ?? raw["domain"]) || null,
-    tenant_name: s(raw["tenant_name"]) || null,
+    tenant_name: optStr("tenant_name"),
     parcel_id: s(raw["parcel_id"] ?? raw["apn"]) || null,
-    lot_size_acres: raw["lot_size_acres"] !== undefined ? n(raw["lot_size_acres"]) : null,
-    lot_size_sqft: raw["lot_size_sqft"] !== undefined ? n(raw["lot_size_sqft"]) : null,
+    lot_size_acres: optNum("lot_size_acres"),
+    lot_size_sqft: optNum("lot_size_sqft"),
     zoning_code: s(raw["zoning_code"] ?? raw["zoning"]) || null,
     county: s(raw["county"] ?? raw["county_name"]) || null,
     county_gis_url: s(raw["county_gis_url"] ?? raw["gis_url"]) || null,
-    description: s(raw["description"]) || null,
-    year_built: raw["year_built"] !== undefined ? n(raw["year_built"]) : null,
-    noi: raw["noi"] !== undefined ? n(raw["noi"]) : null,
+    bays_count: optNum("bays_count"),
+    anchor_type: optStr("anchor_type"),
+    shadow_anchor_name: optStr("shadow_anchor_name"),
+    occupancy_pct: optNum("occupancy_pct"),
+    max_tenant_pct: optNum("max_tenant_pct"),
+    restaurant_pct: optNum("restaurant_pct"),
+    service_tenant_pct: optNum("service_tenant_pct"),
+    roof_type: optStr("roof_type"),
+    roof_age_years: optNum("roof_age_years"),
+    roof_rul_years: optNum("roof_rul_years"),
+    roof_replacement_est: optNum("roof_replacement_est"),
+    hvac_units_count: optNum("hvac_units_count"),
+    hvac_avg_age_years: optNum("hvac_avg_age_years"),
+    hvac_over_12yr_count: optNum("hvac_over_12yr_count"),
+    hvac_replacement_est: optNum("hvac_replacement_est"),
+    parking_stalls: optNum("parking_stalls"),
+    parking_ratio: optNum("parking_ratio"),
+    parking_condition: optStr("parking_condition"),
+    parking_reseal_est: optNum("parking_reseal_est"),
+    traffic_vpd: optNum("traffic_vpd"),
+    intersection_type: optStr("intersection_type"),
+    lease_structure: optStr("lease_structure"),
+    walt_years: optNum("walt_years"),
+    unit_count: optNum("unit_count"),
+    price_per_unit: optNum("price_per_unit"),
+    description: optStr("description"),
+    year_built: optNum("year_built"),
+    noi: optNum("noi"),
     external_url: s(
       raw["external_url"] ?? raw["url"] ?? raw["source_url"] ?? raw["crexi_url"],
       `https://www.crexi.com/properties`,
@@ -262,3 +292,56 @@ export const listingsQuery = (q: ListingQuery) =>
     retry: 1,
     staleTime: 30_000,
   });
+
+export interface UnderwriteActionInput {
+  address: string;
+  asking_price: number;
+  sqft: number;
+  bays_count: number;
+  roof_age_years?: number;
+  hvac_over_12yr_count?: number;
+  parking_reseal_est?: number;
+  occupancy_pct?: number;
+}
+
+export interface UnderwriteActionOutput {
+  buy_box_verdict: "PASS" | "CAUTION" | "FAIL" | string;
+  loi_strike_price: number;
+  total_capex_deductions: number;
+  cadastral_apn: string;
+  breakdown?: Record<string, unknown>;
+}
+
+export async function underwriteDealAction(input: UnderwriteActionInput): Promise<UnderwriteActionOutput | null> {
+  try {
+    return await call<UnderwriteActionOutput>("/pipeline/underwrite-action", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  } catch {
+    return null;
+  }
+}
+
+export interface AgentCopilotResponse {
+  trace_id: string;
+  verdict: string;
+  intent: string;
+  confidence: number;
+  authorized_tools: string[];
+  tool_calls: Record<string, unknown>[];
+  citations: { chunk_id?: string; document_name?: string; rerank_score?: number; snippet?: string }[];
+  response: string;
+  latency_ms: number;
+}
+
+export async function askAgentCopilot(prompt: string, context?: Record<string, unknown>): Promise<AgentCopilotResponse | null> {
+  try {
+    return await call<AgentCopilotResponse>("/agent/chat", {
+      method: "POST",
+      body: JSON.stringify({ prompt, context: context ?? {} }),
+    });
+  } catch {
+    return null;
+  }
+}

@@ -9,7 +9,30 @@ export const PROPERTY_TYPES = [
 
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
 
-export const STATES = ["TX", "FL", "CA", "GA", "NY"] as const;
+export const STATES = [
+  "TX",
+  "FL",
+  "GA",
+  "NC",
+  "TN",
+  "OH",
+  "IN",
+  "IL",
+  "MO",
+  "MN",
+  "MI",
+  "CO",
+  "AZ",
+  "NV",
+  "UT",
+  "CA",
+  "WA",
+  "OR",
+  "PA",
+  "MA",
+  "MD",
+  "NY",
+] as const;
 
 export interface Listing {
   id: string;
@@ -41,7 +64,7 @@ export interface Listing {
   
   // Buy Box & Bay Architecture
   bays_count?: number | null;
-  anchor_type?: "Unanchored" | "Shadow-Anchored" | "Grocery-Anchored" | "Single-Tenant" | null;
+  anchor_type?: "Unanchored" | "Shadow-Anchored" | "Grocery-Anchored" | "Single-Tenant" | string | null;
   shadow_anchor_name?: string | null;
   occupancy_pct?: number | null;
   max_tenant_pct?: number | null;
@@ -69,7 +92,7 @@ export interface Listing {
   radius_3mi_pop_growth_pct?: number | null;
   
   // Lease Structure & WALT
-  lease_structure?: "NNN" | "Modified NNN" | "Gross" | null;
+  lease_structure?: "NNN" | "Modified NNN" | "Gross" | string | null;
   walt_years?: number | null;
   in_place_rent_psf?: number | null;
   market_rent_psf?: number | null;
